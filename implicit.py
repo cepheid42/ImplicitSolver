@@ -40,9 +40,9 @@ ez_one = np.zeros(nx)
 ez_one_rhs = np.zeros(nx)
 
 coef1 = 1.0 / (8 * eps0 * mu0) * (dt / dx) ** 2
-a0 = - coef1 * np.ones(nx - 1)
-b0 = 0.5 - coef1 * np.full(nx, -2.0)
-c0 = - coef1 * np.ones(nx - 1)
+a_0 = - coef1 * np.ones(nx - 1)
+b_0 = 0.5 - coef1 * np.full(nx, -2.0)
+c_0 = - coef1 * np.ones(nx - 1)
 
 
 @jit(nopython=True)
@@ -82,7 +82,7 @@ for q in range(nt):
     # Implicit update to auxillary
     ez_nhalf_rhs[1:] = Ez[1:] + (1 / eps0) * (0.5 * dt / dx) * (By[1:] - By[:nx - 1]) - (0.5 * dt / eps0) * J[:nx - 1]
 
-    ez_nhalf = TDMAsolver(a0, b0, c0, ez_nhalf_rhs)
+    ez_nhalf = TDMAsolver(a_0, b_0, c_0, ez_nhalf_rhs)
 
     Ez[:nx - 1] = ez_nhalf[:nx - 1] - Ez[:nx - 1]
 
@@ -96,7 +96,7 @@ for q in range(nt):
 
     Ez = ez_one - Ez
 
-    if q % 10 == 0:
+    if q % 50 == 0:
         print(f'{q}/{nt}: {time() - start:.3f}s')
         ax1.plot(np.arange(nx - 1), Ez[1:] + q, 'k', lw=1, zorder=nt - q)
         ax1.fill_between(np.arange(nx - 1), Ez[1:] + q, facecolor='w', lw=0, zorder=nt - q - 1)
