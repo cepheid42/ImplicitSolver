@@ -1,5 +1,8 @@
 .idea
+outputs
+cmake-build-debug
+
 CMakeLists.txt
-cmake-build-debug/
 a.out
-outputs/
+Questions
+run
