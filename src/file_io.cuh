@@ -16,21 +16,14 @@ void save_params(int step) {
 }
 
 
-void save_field(const std::string& filename, const float* grid) {
+void save_field(const std::string& filename, const std::unique_ptr<float[]>& grid) {
 	std::ofstream file(filename);
 	file << std::setprecision(std::numeric_limits<float>::max_digits10);
-
-//	for (int i = 0; i < nx; i++) {
-//		auto ind = i; // Just doing the [0, 0, i] row
-//		file << grid[ind] << "\n";
-//	}
-//	file.close();
-
 
 	for (int k = 0; k < nz; k++) {
 		for (int j = 0; j < ny; j++) {
 			for (int i = 0; i < nx; i++) {
-				auto ind = i + (j * ny) + (k * ny * nz);
+				auto ind = get_index(i, j, k);
 				file << grid[ind];
 				if (i != nx - 1) {
 					file << ", ";

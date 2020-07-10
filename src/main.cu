@@ -26,47 +26,51 @@ void run_loop(Efield& e, Bfield& b, Source& s, Tridiagonal& tdm) {
 			}
 		}
 
+		// c1 = dt / (2 * eps0)
+		// c2 = dt / (2 * mu0)
+
 		/* N -> N + 1/2 */
 		// Implicit update
-		implicit_e_half(e.ex_rhs, e.Ex, b.Bz, s.Jx, ddy); // ex = Ex + c1 * ddy * Bz - c2 * Jx
-		implicit_e_half(e.ey_rhs, e.Ey, b.Bx, s.Jy, ddz); // ey = Ey + c1 * ddz * Bx - c2 * Jy
-		implicit_e_half(e.ez_rhs, e.Ez, b.By, s.Jz, ddx); // ez = Ez + c1 * ddx * By - c2 * Jz
+		implicit_e_half(e.ex_rhs, e.Ex, b.Bz, s.Jx, ddy); // ex = Ex + c1 * ddy * Bz - c1 * Jx
+		implicit_e_half(e.ey_rhs, e.Ey, b.Bx, s.Jy, ddz); // ey = Ey + c1 * ddz * Bx - c1 * Jy
+		implicit_e_half(e.ez_rhs, e.Ez, b.By, s.Jz, ddx); // ez = Ez + c1 * ddx * By - c1 * Jz
 
 		tdm.TDMAsolver(e.ex_rhs, e.ex);
 		tdm.TDMAsolver(e.ey_rhs, e.ey);
 		tdm.TDMAsolver(e.ez_rhs, e.ez);
 
 		// Explicit update
-		explicit_e(e.ex, e.Ex);
-		explicit_e(e.ey, e.Ey);
-		explicit_e(e.ez, e.Ez);
+		explicit_e(e.Ex, e.ex);
+		explicit_e(e.Ey, e.ey);
+		explicit_e(e.Ez, e.ez);
 
-		explicit_b(b.Bx, e.ey, ddz); // ddz, ey
-		explicit_b(b.By, e.ez, ddx); // ddx, ez
-		explicit_b(b.Bz, e.ex, ddy); // ddy, ex
+		explicit_b_half(b.Bx, e.ey, ddz); // Bx = Bx + c2 * ddz * ey
+		explicit_b_half(b.By, e.ez, ddx); // By = By + c2 * ddx * ez
+		explicit_b_half(b.Bz, e.ex, ddy); // Bz = Bz + c2 * ddy * ex
 
 		/* N + 1/2 -> N + 1 */
 		// Implicit update
-		implicit_e_one(e.ex_rhs, e.Ex, b.By, ddz); // ddz, By
-		implicit_e_one(e.ey_rhs, e.Ey, b.Bz, ddx); // ddx, Bz
-		implicit_e_one(e.ez_rhs, e.Ez, b.Bx, ddy); // ddy, Bx
+		implicit_e_one(e.ex_rhs, e.Ex, b.By, ddz); // ex = Ex - c1 * ddz * By
+		implicit_e_one(e.ey_rhs, e.Ey, b.Bz, ddx); // ey = Ey - c1 * ddx * Bz
+		implicit_e_one(e.ez_rhs, e.Ez, b.Bx, ddy); // ez = Ez - c1 * ddy * Bx
 
 		// Explicit update
-		explicit_e(e.ex, e.Ex);
-		explicit_e(e.ey, e.Ey);
-		explicit_e(e.ez, e.Ez);
+		explicit_e(e.Ex, e.ex);
+		explicit_e(e.Ey, e.ey);
+		explicit_e(e.Ez, e.ez);
 
-		explicit_b(b.Bx, e.ez, ddy); // ddy, ez
-		explicit_b(b.By, e.ex, ddz); // ddz, ex
-		explicit_b(b.Bz, e.ey, ddx); // ddx, ey
+		explicit_b_one(b.Bx, e.ez, ddy); // Bx = Bx - c2 * ddy * ez
+		explicit_b_one(b.By, e.ex, ddz); // By = By - c2 * ddz * ex
+		explicit_b_one(b.Bz, e.ey, ddx); // Bz = Bz - c2 * ddx * ey
 
 		if (q % step == 0) {
-			cout << q << "/" << nt << ": " << update_loop_timer << "s" << endl;
+			update_loop_timer.split();
+			cout << q << "/" << nt << ": " << setprecision(3) << update_loop_timer.elapsed() << "s" << endl;
 			snapshot(q, e, b);
 		}
 	}
 	update_loop_timer.stop();
-	cout << "Total loop time: " << update_loop_timer.total << "s" << endl;
+	cout << "Total loop time: " << setprecision(3) << update_loop_timer.time() << "s" << endl;
 }
 
 int main() {
@@ -83,7 +87,9 @@ int main() {
 	Efield e;
 	Bfield b;
 	Source s;
+
 	Tridiagonal tdm;
+	tdm.init();
 
 	run_loop(e, b, s, tdm);
 	return 0;

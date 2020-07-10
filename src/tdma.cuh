@@ -5,11 +5,15 @@
 
 class Tridiagonal {
 public:
-	Tridiagonal() {
-		a = new float[nx - 1];
-		c = new float[nx - 1];
-		b = new float[nx];
+	Tridiagonal() :
+		a(new float[nx - 1]),
+		c(new float[nx - 1]),
+		b(new float[nx])
+	{}
 
+	~Tridiagonal() = default;
+
+	void init() const {
 		float coeff = 1.0f / (8.0f * eps0 * mu0) * (dt / dx) * (dt / dx);
 		for (int i = 0; i < nx - 1; i++) {
 			a[i] = -1 * coeff;
@@ -19,21 +23,15 @@ public:
 		b[nx - 1] = 0.5f - coeff * (-2.0f);
 	}
 
-	~Tridiagonal() {
-		delete[] a;
-		delete[] b;
-		delete[] c;
-	}
-
-	void TDMAsolver(const float* d, float*x) const;
+	void TDMAsolver(const std::unique_ptr<float[]>& d, std::unique_ptr<float[]>& x) const;
 
 public:
-	float* a;
-	float* b;
-	float* c;
+	std::unique_ptr<float[]> a;
+	std::unique_ptr<float[]> b;
+	std::unique_ptr<float[]> c;
 };
 
-void Tridiagonal::TDMAsolver(const float* d, float* x) const {
+void Tridiagonal::TDMAsolver(const std::unique_ptr<float[]>& d, std::unique_ptr<float[]>& x) const {
 	// Create local copies once
 	auto* cc = new float[nx - 1]();
 	auto* dc = new float[nx]();

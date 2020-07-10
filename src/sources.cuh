@@ -5,27 +5,23 @@
 
 class Source {
 public:
-	Source() {
-		Jx = new float[nz * ny * nx]();
-		Jy = new float[nz * ny * nx]();
-		Jz = new float[nz * ny * nx]();
-	}
+	Source() :
+			Jx(new float[nz * ny * nx]{}),
+			Jy(new float[nz * ny * nx]{}),
+			Jz(new float[nz * ny * nx]{})
+	{}
 
-	~Source() {
-		delete[] Jx;
-		delete[] Jy;
-		delete[] Jz;
-	}
+	~Source() = default;
 
 public:
-	float* Jx;
-	float* Jy;
-	float* Jz;
+	std::unique_ptr<float[]> Jx;
+	std::unique_ptr<float[]> Jy;
+	std::unique_ptr<float[]> Jz;
 };
 
 
 // Verified
-inline float inc_ez(int time_step, int y_loc) {
+float inc_ez(int time_step, int y_loc) {
 	float time = float(time_step) * dt;
 	float time_dep_s = sinf(2.0f * pi * freq * time) * expf(-1.0f * powf(time - t0, n0) / (2.0f * powf(sig0, n0)));
 
@@ -33,7 +29,7 @@ inline float inc_ez(int time_step, int y_loc) {
 }
 
 // Verified
-inline float inc_ey(int time_step, int y_loc) {
+float inc_ey(int time_step, int y_loc) {
 	float time = float(time_step) * dt;
 	float time_dep_c = cosf(2.0f * pi * freq * time) * expf(-1.0f * powf(time - t0, n0) / (2.0f * powf(sig0, n0)));
 

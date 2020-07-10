@@ -5,22 +5,18 @@
 
 class Bfield {
 public:
-	Bfield() {
-		Bx = new float[nz * ny * nx]();
-		By = new float[nz * ny * nx]();
-		Bz = new float[nz * ny * nx]();
-	}
+	Bfield() :
+		Bx(new float[nz * ny * nx]{}),
+		By(new float[nz * ny * nx]{}),
+		Bz(new float[nz * ny * nx]{})
+	{}
 
-	~Bfield() {
-		delete[] Bx;
-		delete[] By;
-		delete[] Bz;
-	}
+	~Bfield() = default;
 
 public:
-	float* Bx;
-	float* By;
-	float* Bz;
+	std::unique_ptr<float[]> Bx;
+	std::unique_ptr<float[]> By;
+	std::unique_ptr<float[]> Bz;
 };
 
 #endif //REGIMPLICIT_B_FIELD_H

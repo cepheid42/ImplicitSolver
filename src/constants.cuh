@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iomanip>
 #include <limits>
+#include <cassert>
 #include <cmath>
 #include <chrono>
 
@@ -46,49 +47,52 @@ const float dt = cfl * dx / c0;
 const int nt = int(num_wavelengths * lambda / c0 / dt) + 1;
 
 /* ====== Derivatives Coefficients ====== */
-const float ddx = 0.5f * dt / dx;
-const float ddy = 0.5f * dt / dy;
-const float ddz = 0.5f * dt / dz;
+const float ddx = 1.0f / dx;
+const float ddy = 1.0f / dy;
+const float ddz = 1.0f / dz;
 
-const float ddeps0 = 0.5f * dt / eps0;
-const float inv_eps0 = 1.0f / eps0;
-const float inv_mu0 = 1.0f / mu0;
+const float c1 = dt / (2.0f * eps0);
+const float c2 = dt / (2.0f * mu0);
 
 /* ===== Timer struct ===== */
-struct Timer {
+class Timer {
+private:
 	steady_clock::time_point start_time;
 	steady_clock::time_point end_time;
 	steady_clock::time_point last;
 
-	float elapsed = 0.0f;
-	float total = 0.0f;
+	float elapsed_time = 0.0f;
+	float total_time = 0.0f;
 
-	inline void start() {
+public:
+	void start() {
 		start_time = steady_clock::now();
 		last = start_time;
 	}
 
-	inline void stop() {
+	void stop() {
 		end_time = steady_clock::now();
-		total = duration<float>(end_time - start_time).count();
+		total_time = duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 	}
 
-	inline void split() {
-		steady_clock::time_point current = steady_clock::now();
-		elapsed += duration<float>(current - last).count();
+	void split() {
+		auto current = steady_clock::now();
+		elapsed_time += duration_cast<std::chrono::milliseconds>(current - last).count();
 		last = current;
+	}
+
+	float elapsed() const {
+		return elapsed_time / 1000.0f;
+	}
+
+	float time() const {
+		return total_time / 1000.0f;
 	}
 };
 
-inline std::ostream& operator<<(std::ostream &out, Timer& t) {
-	t.split();
-	out << std::fixed << std::setprecision(3) << t.elapsed;
-	return out;
-}
-
 /* ===== Utility Functions ===== */
 inline int get_index(int i, int j, int k) {
-	return i + (j * ny) + (k * ny * nz);
+	return i + (nx * (j + (ny * k)));
 }
 
 #endif //REGIMPLICIT_CONSTANTS_H
