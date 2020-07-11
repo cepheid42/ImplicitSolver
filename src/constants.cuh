@@ -55,16 +55,14 @@ const float c1 = dt / (2.0f * eps0);
 const float c2 = dt / (2.0f * mu0);
 
 /* ===== Timer struct ===== */
-class Timer {
-private:
+struct Timer {
 	steady_clock::time_point start_time;
 	steady_clock::time_point end_time;
 	steady_clock::time_point last;
 
-	float elapsed_time = 0.0f;
-	float total_time = 0.0f;
+	float elapsed = 0.0f;
+	float total = 0.0f;
 
-public:
 	void start() {
 		start_time = steady_clock::now();
 		last = start_time;
@@ -72,21 +70,14 @@ public:
 
 	void stop() {
 		end_time = steady_clock::now();
-		total_time = duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+		total = duration<float>(end_time - start_time).count();
 	}
 
-	void split() {
-		auto current = steady_clock::now();
-		elapsed_time += duration_cast<std::chrono::milliseconds>(current - last).count();
+	float split() {
+		steady_clock::time_point current = steady_clock::now();
+		elapsed += duration<float>(current - last).count();
 		last = current;
-	}
-
-	float elapsed() const {
-		return elapsed_time / 1000.0f;
-	}
-
-	float time() const {
-		return total_time / 1000.0f;
+		return elapsed;
 	}
 };
 

@@ -6,10 +6,8 @@
 #include "sources.cuh"
 #include "constants.cuh"
 
-
 using float_ptr = std::unique_ptr<float[]>;
 
-// Verified
 // ex = Ex + c1 * ddy * Bz - c1 * Jx
 // ey = Ey + c1 * ddz * Bx - c1 * Jy
 // ez = Ez + c1 * ddx * By - c1 * Jz
@@ -24,7 +22,6 @@ void implicit_e_half(float_ptr& e, const float_ptr& E, const float_ptr& B, const
 	}
 }
 
-// Verified
 // ex = Ex - c1 * ddz * By
 // ey = Ey - c1 * ddx * Bz
 // ez = Ez - c1 * ddy * Bx
@@ -39,7 +36,6 @@ void implicit_e_one(float_ptr& e, const float_ptr& E, const float_ptr& B, float 
 	}
 }
 
-// Verified
 // Same for N -> N + 1/2 -> N + 1
 // E = e - E
 void explicit_e(float_ptr& E, const float_ptr& e) {
@@ -53,7 +49,6 @@ void explicit_e(float_ptr& E, const float_ptr& e) {
 	}
 }
 
-// Verified
 // Adds finite diff
 // Bx = Bx + c2 * ddz * ey
 // By = By + c2 * ddx * ez
@@ -71,7 +66,6 @@ void explicit_b_half(float_ptr& B, const float_ptr& e, float deriv) {
 	}
 }
 
-// Verified
 // Subtracts finite diff
 // Bx = Bx - c2 * ddy * ez
 // By = By - c2 * ddz * ex

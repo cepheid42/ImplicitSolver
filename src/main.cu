@@ -20,12 +20,10 @@ void run_loop(Efield& e, Bfield& b, Source& s, Tridiagonal& tdm) {
 		// Source
 		for (int k = 0; k < nz; k++) {
 			for (int j = 0; j < ny; j++) {
-				auto ind = get_index(0, j, k);
-				s.Jy[ind] = inc_ey(q, j);
-				s.Jz[ind] = inc_ez(q, j);
+				s.inc_ey(q, j, k);
+				s.inc_ez(q, j, k);
 			}
 		}
-
 		// c1 = dt / (2 * eps0)
 		// c2 = dt / (2 * mu0)
 
@@ -48,38 +46,41 @@ void run_loop(Efield& e, Bfield& b, Source& s, Tridiagonal& tdm) {
 		explicit_b_half(b.By, e.ez, ddx); // By = By + c2 * ddx * ez
 		explicit_b_half(b.Bz, e.ex, ddy); // Bz = Bz + c2 * ddy * ex
 
-		/* N + 1/2 -> N + 1 */
-		// Implicit update
-		implicit_e_one(e.ex_rhs, e.Ex, b.By, ddz); // ex = Ex - c1 * ddz * By
-		implicit_e_one(e.ey_rhs, e.Ey, b.Bz, ddx); // ey = Ey - c1 * ddx * Bz
-		implicit_e_one(e.ez_rhs, e.Ez, b.Bx, ddy); // ez = Ez - c1 * ddy * Bx
-
-		// Explicit update
-		explicit_e(e.Ex, e.ex);
-		explicit_e(e.Ey, e.ey);
-		explicit_e(e.Ez, e.ez);
-
-		explicit_b_one(b.Bx, e.ez, ddy); // Bx = Bx - c2 * ddy * ez
-		explicit_b_one(b.By, e.ex, ddz); // By = By - c2 * ddz * ex
-		explicit_b_one(b.Bz, e.ey, ddx); // Bz = Bz - c2 * ddx * ey
+//		/* N + 1/2 -> N + 1 */
+//		// Implicit update
+//		implicit_e_one(e.ex_rhs, e.Ex, b.By, ddz); // ex = Ex - c1 * ddz * By
+//		implicit_e_one(e.ey_rhs, e.Ey, b.Bz, ddx); // ey = Ey - c1 * ddx * Bz
+//		implicit_e_one(e.ez_rhs, e.Ez, b.Bx, ddy); // ez = Ez - c1 * ddy * Bx
+//
+//		// Explicit update
+//		explicit_e(e.Ex, e.ex);
+//		explicit_e(e.Ey, e.ey);
+//		explicit_e(e.Ez, e.ez);
+//
+//		explicit_b_one(b.Bx, e.ez, ddy); // Bx = Bx - c2 * ddy * ez
+//		explicit_b_one(b.By, e.ex, ddz); // By = By - c2 * ddz * ex
+//		explicit_b_one(b.Bz, e.ey, ddx); // Bz = Bz - c2 * ddx * ey
 
 		if (q % step == 0) {
 			update_loop_timer.split();
-			cout << q << "/" << nt << ": " << setprecision(3) << update_loop_timer.elapsed() << "s" << endl;
-			snapshot(q, e, b);
+			cout << q << "/" << nt << ": " << fixed << setprecision(3) << update_loop_timer.split() << "s" << endl;
+			snapshot(q, e, b, s);
 		}
 	}
 	update_loop_timer.stop();
-	cout << "Total loop time: " << setprecision(3) << update_loop_timer.time() << "s" << endl;
+	cout << "Total loop time: " << setprecision(3) << update_loop_timer.total << "s" << endl;
 }
 
 int main() {
 
 	// todo:
 	//  1.) Figure out why outputs are always 0
-	//  2.) Plot slices
-	//  3.) Output processing
-	//  4.) Verify update functions work correctly
+	//  1a.) Verify iteration direction of update functions (everything is iterated as x,y,z from fastest to slowest)
+	//  1b.) If finite differences are taken in orthogonal directions then they might be zero
+	//  If field is same along x then [x1, y1, z1] - [x2, y1, z1] = 0
+	//  So instead try [x1, y1, z1] - [x1, y2, z1] != 0
+	//  2.) Output processing
+	//  3.) Verify update functions work correctly
 
 
 	save_params(step);

@@ -36,12 +36,15 @@ void save_field(const std::string& filename, const std::unique_ptr<float[]>& gri
 }
 
 
-void snapshot(int q, Efield& e, Bfield& b) {
+void snapshot(int q, Efield& e, Bfield& b, Source& s) {
 	std::string qs = std::to_string(q);
 	// todo: add output processing steps
 	save_field("outputs/ex/t" + qs + ".csv", e.Ex);
 	save_field("outputs/ey/t" + qs + ".csv", e.Ey);
 	save_field("outputs/ez/t" + qs + ".csv", e.Ez);
+	save_field("outputs/jx/t" + qs + ".csv", s.Jx);
+	save_field("outputs/jy/t" + qs + ".csv", s.Jy);
+	save_field("outputs/jz/t" + qs + ".csv", s.Jz);
 }
 
 #endif //REGIMPLICIT_FILE_IO_H
