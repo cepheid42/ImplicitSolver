@@ -10,59 +10,76 @@ using namespace std;
 
 const int step = 10;
 
-
-void run_loop(Efield& e, Bfield& b, Source& s, Tridiagonal& tdm) {
+void run_loop(Efield& e, Bfield& b, Source& s) {
 	Timer update_loop_timer;
 	update_loop_timer.start();
+
+	Tridiagonal td_x_half(nx);
+	td_x_half.init(ddy);
+
+	Tridiagonal td_y_half(ny);
+	td_y_half.init(ddz);
+
+	Tridiagonal td_z_half(nz);
+	td_z_half.init(ddx);
+
+	Tridiagonal td_x_one(nx);
+	td_x_one.init(ddz);
+
+	Tridiagonal td_y_one(ny);
+	td_y_one.init(ddx);
+
+	Tridiagonal td_z_one(nz);
+	td_z_one.init(ddy);
 
 	// Begin time loop
 	for (int q = 0; q < nt; q++) {
 		// Source
-		for (int k = 0; k < nz; k++) {
-			for (int j = 0; j < ny; j++) {
-				s.inc_ey(q, j, k);
-				s.inc_ez(q, j, k);
-			}
-		}
+		inc_ey(s.Jy, q);
+		inc_ez(s.Jz, q);
+
 		// c1 = dt / (2 * eps0)
 		// c2 = dt / (2 * mu0)
 
 		/* N -> N + 1/2 */
 		// Implicit update
-		implicit_e_half(e.ex_rhs, e.Ex, b.Bz, s.Jx, ddy); // ex = Ex + c1 * ddy * Bz - c1 * Jx
-		implicit_e_half(e.ey_rhs, e.Ey, b.Bx, s.Jy, ddz); // ey = Ey + c1 * ddz * Bx - c1 * Jy
-		implicit_e_half(e.ez_rhs, e.Ez, b.By, s.Jz, ddx); // ez = Ez + c1 * ddx * By - c1 * Jz
+		implicit_ex_half(e.ex_rhs, e.Ex, b.Bz, s.Jx); // ex = Ex + c1 * ddy * Bz - c1 * Jx
+		implicit_ey_half(e.ey_rhs, e.Ey, b.Bx, s.Jy); // ey = Ey + c1 * ddz * Bx - c1 * Jy
+		implicit_ez_half(e.ez_rhs, e.Ez, b.By, s.Jz); // ez = Ez + c1 * ddx * By - c1 * Jz
 
-		tdm.TDMAsolver(e.ex_rhs, e.ex);
-		tdm.TDMAsolver(e.ey_rhs, e.ey);
-		tdm.TDMAsolver(e.ez_rhs, e.ez);
+		x_solve(td_x_half, e.ex_rhs, e.ex);
+		x_solve(td_y_half, e.ey_rhs, e.ey);
+		x_solve(td_z_half, e.ez_rhs, e.ez);
 
 		// Explicit update
-		explicit_e(e.Ex, e.ex);
-		explicit_e(e.Ey, e.ey);
-		explicit_e(e.Ez, e.ez);
+		explicit_E(e.Ex, e.ex);
+		explicit_E(e.Ey, e.ey);
+		explicit_E(e.Ez, e.ez);
 
-		explicit_b_half(b.Bx, e.ey, ddz); // Bx = Bx + c2 * ddz * ey
-		explicit_b_half(b.By, e.ez, ddx); // By = By + c2 * ddx * ez
-		explicit_b_half(b.Bz, e.ex, ddy); // Bz = Bz + c2 * ddy * ex
+		explicit_bx_half(b.Bx, e.ey); // Bx = Bx + c2 * ddz * ey
+		explicit_by_half(b.By, e.ez); // By = By + c2 * ddx * ez
+		explicit_bz_half(b.Bz, e.ex); // Bz = Bz + c2 * ddy * ex
 
-//		/* N + 1/2 -> N + 1 */
-//		// Implicit update
-//		implicit_e_one(e.ex_rhs, e.Ex, b.By, ddz); // ex = Ex - c1 * ddz * By
-//		implicit_e_one(e.ey_rhs, e.Ey, b.Bz, ddx); // ey = Ey - c1 * ddx * Bz
-//		implicit_e_one(e.ez_rhs, e.Ez, b.Bx, ddy); // ez = Ez - c1 * ddy * Bx
-//
-//		// Explicit update
-//		explicit_e(e.Ex, e.ex);
-//		explicit_e(e.Ey, e.ey);
-//		explicit_e(e.Ez, e.ez);
-//
-//		explicit_b_one(b.Bx, e.ez, ddy); // Bx = Bx - c2 * ddy * ez
-//		explicit_b_one(b.By, e.ex, ddz); // By = By - c2 * ddz * ex
-//		explicit_b_one(b.Bz, e.ey, ddx); // Bz = Bz - c2 * ddx * ey
+		/* N + 1/2 -> N + 1 */
+		// Implicit update
+		implicit_ex_one(e.ex_rhs, e.Ex, b.By); // ex = Ex - c1 * ddz * By
+		implicit_ey_one(e.ey_rhs, e.Ey, b.Bz); // ey = Ey - c1 * ddx * Bz
+		implicit_ez_one(e.ez_rhs, e.Ez, b.Bx); // ez = Ez - c1 * ddy * Bx
+
+		x_solve(td_x_one, e.ex_rhs, e.ex);
+		x_solve(td_y_one, e.ey_rhs, e.ey);
+		x_solve(td_z_one, e.ez_rhs, e.ez);
+
+		// Explicit update
+		explicit_E(e.Ex, e.ex);
+		explicit_E(e.Ey, e.ey);
+		explicit_E(e.Ez, e.ez);
+
+		explicit_bx_one(b.Bx, e.ez); // Bx = Bx - c2 * ddy * ez
+		explicit_by_one(b.By, e.ex); // By = By - c2 * ddz * ex
+		explicit_bz_one(b.Bz, e.ey); // Bz = Bz - c2 * ddx * ey
 
 		if (q % step == 0) {
-			update_loop_timer.split();
 			cout << q << "/" << nt << ": " << fixed << setprecision(3) << update_loop_timer.split() << "s" << endl;
 			snapshot(q, e, b, s);
 		}
@@ -72,26 +89,12 @@ void run_loop(Efield& e, Bfield& b, Source& s, Tridiagonal& tdm) {
 }
 
 int main() {
-
-	// todo:
-	//  1.) Figure out why outputs are always 0
-	//  1a.) Verify iteration direction of update functions (everything is iterated as x,y,z from fastest to slowest)
-	//  1b.) If finite differences are taken in orthogonal directions then they might be zero
-	//  If field is same along x then [x1, y1, z1] - [x2, y1, z1] = 0
-	//  So instead try [x1, y1, z1] - [x1, y2, z1] != 0
-	//  2.) Output processing
-	//  3.) Verify update functions work correctly
-
-
 	save_params(step);
 
 	Efield e;
 	Bfield b;
 	Source s;
 
-	Tridiagonal tdm;
-	tdm.init();
-
-	run_loop(e, b, s, tdm);
+	run_loop(e, b, s);
 	return 0;
 }

@@ -19,20 +19,32 @@ public:
 		ez_rhs(new float[nz * ny * nx]{})
 	{}
 
-	~Efield() = default;
+	~Efield() {
+		delete[] Ex;
+		delete[] ex;
+		delete[] ex_rhs;
+
+		delete[] Ey;
+		delete[] ey;
+		delete[] ey_rhs;
+
+		delete[] Ez;
+		delete[] ez;
+		delete[] ez_rhs;
+	}
 
 public:
-	std::unique_ptr<float[]> Ex;
-	std::unique_ptr<float[]> ex;
-	std::unique_ptr<float[]> ex_rhs;
+	float* Ex;
+	float* ex;
+	float* ex_rhs;
 
-	std::unique_ptr<float[]> Ey;
-	std::unique_ptr<float[]> ey;
-	std::unique_ptr<float[]> ey_rhs;
+	float* Ey;
+	float* ey;
+	float* ey_rhs;
 
-	std::unique_ptr<float[]> Ez;
-	std::unique_ptr<float[]> ez;
-	std::unique_ptr<float[]> ez_rhs;
+	float* Ez;
+	float* ez;
+	float* ez_rhs;
 };
 
 #endif //REGIMPLICIT_E_FIELD_H

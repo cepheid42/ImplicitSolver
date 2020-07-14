@@ -30,33 +30,37 @@ def get_files(folder, params):
     for q in range(0, params.nt, params.step):
         filename = f'outputs/{folder}/t{q}.csv'
         try:
-            temp = np.genfromtxt(filename, dtype=np.float64).reshape((params.nz, params.ny, params.nx))
+            temp = np.genfromtxt(filename, delimiter=',', dtype=np.float32).reshape((params.nx, params.ny, params.nz))
             store.append(temp)
         except:
             print(f'Unable to open file {filename}. Continuing.')
+
 
     return np.asarray(store)
 
 
 if __name__ == '__main__':
     p = Params()
-    ez_files = get_files('ez', p)
-    ez = ez_files[0]
+    ey_files = get_files('ey', p)
 
-    ix = p.nx * p.dx
-    iy = p.ny * p.dy
-    iz = p.nz * p.dz
+    frames = [go.Frame(data=go.Surface(z=ey_files[i][p.nx // 2, :, :])) for i in range(1, len(ey_files))]
 
-    X, Y, Z = np.mgrid[0:iz:p.nz, 0:iy:p.ny, 0:ix:p.nx]
 
-    fig = go.Figure(data=go.Volume(
-        x=X.flatten(),
-        y=Y.flatten(),
-        z=Z.flatten(),
-        value=ez.flatten(),
-        isomin=0.1,
-        isomax=0.8,
-        opacity=0.1, # needs to be small to see through all surfaces
-        surface_count=17, # needs to be a large number for good volume rendering
-    ))
+    fig = go.Figure(
+        data=go.Surface(z=ey_files[0][p.nx // 2, :, :]),
+        layout=go.Layout(
+            xaxis=dict(autorange=True),
+            yaxis=dict(autorange=True),
+            title="Ey",
+            updatemenus=[dict(
+                type="buttons",
+                buttons=[dict(label="Play",
+                              method="animate",
+                              args=[None])])]
+        ),
+        frames=frames
+    )
+
+
+
     fig.show()

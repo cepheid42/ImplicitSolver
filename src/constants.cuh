@@ -13,7 +13,7 @@ using std::chrono::steady_clock;
 using std::chrono::duration_cast;
 using std::chrono::duration;
 
-/* ===== Constants ===== */
+/* ===== Physical Constants ===== */
 const float c0   = 299792458.0f;  // speed of light, m/s
 const float eps0 = 8.85418782e-12f;
 const float mu0  = 1.25663706e-6f;
@@ -46,7 +46,7 @@ const float cfl = 0.7f;
 const float dt = cfl * dx / c0;
 const int nt = int(num_wavelengths * lambda / c0 / dt) + 1;
 
-/* ====== Derivatives Coefficients ====== */
+/* ====== Derivative Coefficients ====== */
 const float ddx = 1.0f / dx;
 const float ddy = 1.0f / dy;
 const float ddz = 1.0f / dz;

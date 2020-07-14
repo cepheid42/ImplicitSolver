@@ -11,12 +11,16 @@ public:
 		Bz(new float[nz * ny * nx]{})
 	{}
 
-	~Bfield() = default;
+	~Bfield() {
+		delete[] Bx;
+		delete[] By;
+		delete[] Bz;
+	}
 
 public:
-	std::unique_ptr<float[]> Bx;
-	std::unique_ptr<float[]> By;
-	std::unique_ptr<float[]> Bz;
+	float* Bx;
+	float* By;
+	float* Bz;
 };
 
 #endif //REGIMPLICIT_B_FIELD_H
