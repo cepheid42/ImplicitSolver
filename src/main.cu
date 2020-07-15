@@ -47,9 +47,9 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 		implicit_ey_half(e.ey_rhs, e.Ey, b.Bx, s.Jy); // ey = Ey + c1 * ddz * Bx - c1 * Jy
 		implicit_ez_half(e.ez_rhs, e.Ez, b.By, s.Jz); // ez = Ez + c1 * ddx * By - c1 * Jz
 
-		x_solve(td_x_half, e.ex_rhs, e.ex);
-		x_solve(td_y_half, e.ey_rhs, e.ey);
-		x_solve(td_z_half, e.ez_rhs, e.ez);
+		ddy_solve(td_x_half, e.ex_rhs, e.ex);
+		ddz_solve(td_y_half, e.ey_rhs, e.ey);
+		ddx_solve(td_z_half, e.ez_rhs, e.ez);
 
 		// Explicit update
 		explicit_E(e.Ex, e.ex);
@@ -66,9 +66,9 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 		implicit_ey_one(e.ey_rhs, e.Ey, b.Bz); // ey = Ey - c1 * ddx * Bz
 		implicit_ez_one(e.ez_rhs, e.Ez, b.Bx); // ez = Ez - c1 * ddy * Bx
 
-		x_solve(td_x_one, e.ex_rhs, e.ex);
-		x_solve(td_y_one, e.ey_rhs, e.ey);
-		x_solve(td_z_one, e.ez_rhs, e.ez);
+		ddz_solve(td_x_one, e.ex_rhs, e.ex);
+		ddx_solve(td_y_one, e.ey_rhs, e.ey);
+		ddy_solve(td_z_one, e.ez_rhs, e.ez);
 
 		// Explicit update
 		explicit_E(e.Ex, e.ex);

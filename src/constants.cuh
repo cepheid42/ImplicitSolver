@@ -83,7 +83,7 @@ struct Timer {
 
 /* ===== Utility Functions ===== */
 inline int get_index(int i, int j, int k) {
-	return i + (nx * (j + (ny * k)));
+	return i + (nx * j) + (nx * ny * k);
 }
 
 #endif //REGIMPLICIT_CONSTANTS_H
