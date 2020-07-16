@@ -17,7 +17,7 @@ using std::chrono::duration;
 const float c0   = 299792458.0f;  // speed of light, m/s
 const float eps0 = 8.85418782e-12f;
 const float mu0  = 1.25663706e-6f;
-const float pi   = 3.1415926535f;
+const float pi = 3.1415926535f;
 
 const float freq = 14.0e6f;
 const float lambda = c0 / freq;
@@ -82,7 +82,7 @@ struct Timer {
 };
 
 /* ===== Utility Functions ===== */
-inline int get_index(int i, int j, int k) {
+inline unsigned get_index(unsigned i, unsigned j, unsigned k) {
 	return i + (nx * j) + (nx * ny * k);
 }
 

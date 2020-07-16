@@ -9,6 +9,7 @@ public:
 		Bx(new float[nz * ny * nx]{}),
 		By(new float[nz * ny * nx]{}),
 		Bz(new float[nz * ny * nx]{})
+//		By(new float[nx])
 	{}
 
 	~Bfield() {

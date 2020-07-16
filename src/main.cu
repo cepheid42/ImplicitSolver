@@ -21,7 +21,7 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 	td_y_half.init(ddz);
 
 	Tridiagonal td_z_half(nz);
-	td_z_half.init(ddx);
+	td_z_half.init((1.0f / dx));
 
 	Tridiagonal td_x_one(nx);
 	td_x_one.init(ddz);
@@ -51,6 +51,7 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 		ddz_solve(td_y_half, e.ey_rhs, e.ey);
 		ddx_solve(td_z_half, e.ez_rhs, e.ez);
 
+
 		// Explicit update
 		explicit_E(e.Ex, e.ex);
 		explicit_E(e.Ey, e.ey);
@@ -59,6 +60,7 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 		explicit_bx_half(b.Bx, e.ey); // Bx = Bx + c2 * ddz * ey
 		explicit_by_half(b.By, e.ez); // By = By + c2 * ddx * ez
 		explicit_bz_half(b.Bz, e.ex); // Bz = Bz + c2 * ddy * ex
+
 
 		/* N + 1/2 -> N + 1 */
 		// Implicit update

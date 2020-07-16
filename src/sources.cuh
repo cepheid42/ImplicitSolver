@@ -6,9 +6,10 @@
 class Source {
 public:
 	Source() :
-			Jx(new float[nz * ny * nx]{}),
-			Jy(new float[nz * ny * nx]{}),
-			Jz(new float[nz * ny * nx]{})
+		Jx(new float[nz * ny * nx]{}),
+		Jy(new float[nz * ny * nx]{}),
+		Jz(new float[nz * ny * nx]{})
+//		Jz(new float[nx]{})
 	{}
 
 	~Source() {
@@ -27,7 +28,7 @@ public:
 void inc_ey(float* Jy, int time_step) {
 	for (int k = 0; k < nz; k++) {
 		for (int j = 0; j < ny; j++) {
-			int ind = get_index(0, j, k);
+			auto ind = get_index(0, j, k);
 			float time = float(time_step) * dt;
 			float time_dep_c = std::cos(2.0f * pi * freq * time) * std::exp(-1.0f * std::pow(time - t0, n0) / (2.0f * std::pow(sig0, n0)));
 
@@ -40,7 +41,7 @@ void inc_ey(float* Jy, int time_step) {
 void inc_ez(float* Jz, int time_step) {
 	for (int k = 0; k < nz; k++) {
 		for (int j = 0; j < ny; j++) {
-			int ind = get_index(0, j, k);
+			auto ind = get_index(0, j, k);
 			float time = float(time_step) * dt;
 			float time_dep_s = std::sin(2.0f * pi * freq * time) * std::exp(-1.0f * std::pow(time - t0, n0) / (2.0f * std::pow(sig0, n0)));
 
@@ -48,5 +49,10 @@ void inc_ez(float* Jz, int time_step) {
 		}
 	}
 }
+
+//void inc_ez_wave(float *Jz, int q) {
+//	auto ind = get_index(0, int(ny / 2) + 1, int(nz / 2) + 1);
+//	Jz[ind] = std::sin(2.0f * pi * freq * (float(q) * dt));
+//}
 
 #endif //REGIMPLICIT_SOURCES_H

@@ -6,6 +6,9 @@
 class Efield {
 public:
 	Efield() :
+//		Ez    (new float[nx]{}),
+//		ez    (new float[nx]{}),
+//		ez_rhs(new float[nx]{})
 		Ex    (new float[nz * ny * nx]{}),
 		ex    (new float[nz * ny * nx]{}),
 		ex_rhs(new float[nz * ny * nx]{}),

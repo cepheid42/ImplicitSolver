@@ -40,6 +40,33 @@ public:
 	int size;
 };
 
+//void onedim_solve(const Tridiagonal& t, const float* d, float* x) {
+//	auto* cc = new float[nx - 1]{};
+//	auto* dc = new float[nx]{};
+//	/* Forward Pass */
+//	// First elements of cc and dc
+//	cc[0] = t.c[0] / t.b[0];
+//	dc[0] = d[0] / t.b[0];
+//
+//	// loop until (i == nx - 2), where cc ends
+//	for (int i = 1; i < nx - 1; i++) {
+//		float m = 1.0f / (t.b[i] - t.a[i - 1] * cc[i - 1]);
+//		cc[i] = t.c[i] * m;
+//		dc[i] = (d[i] - (t.a[i - 1] * dc[i - 1])) * m;
+//	}
+//	// Last element of dc
+//	dc[nx - 1] = (d[nx - 1] - (t.a[nx - 2] * dc[nx - 2])) / (t.b[nx - 1] - (t.a[nx - 2] * cc[nx - 2]));
+//
+//	/* Backwards substitution */
+//	// Do last element first
+//	x[nx - 1] = dc[nx - 1];
+//	// Iterate backwards through current row
+//	for (int i = nx - 2; i >= 0; i--) {
+//		x[i] = dc[i] - (cc[i] * x[i + 1]);
+//	}
+//	delete[] cc;
+//	delete[] dc;
+//}
 
 void ddx_solve(const Tridiagonal& t, const float* d, float* x) {
 	auto* cc = new float[nx - 1]{};
@@ -104,12 +131,12 @@ void ddy_solve(const Tridiagonal& t, const float* d, float* x) {
 			for (int j = 1; j < ny - 1; j++) {
 				auto ind = get_index(i, j, k);
 
-				float m = 1.0f / (t.b[j] - t.a[j - 1] * cc[j - 1]);
+				float m = 1.0f / (t.b[j] - (t.a[j - 1] * cc[j - 1]));
 				cc[j] = t.c[j] * m;
-				dc[j] = (d[ind] - t.a[j - 1] * dc[j - 1]) * m;
+				dc[j] = (d[ind] - (t.a[j - 1] * dc[j - 1])) * m;
 			}
 			// Last element of dc
-			dc[ny - 1] = (d[last_ind] - t.a[ny - 2] * dc[ny - 2]) / (t.b[ny - 1] - t.a[ny - 2] * cc[ny - 2]);
+			dc[ny - 1] = (d[last_ind] - (t.a[ny - 2] * dc[ny - 2])) / (t.b[ny - 1] - (t.a[ny - 2] * cc[ny - 2]));
 
 			/* Backwards substitution */
 			// Do last element first
@@ -118,7 +145,7 @@ void ddy_solve(const Tridiagonal& t, const float* d, float* x) {
 			for (int j = ny - 2; j >= 0; j--) {
 				auto ind  = get_index(i,     j, k);
 				auto ind2 = get_index(i, j + 1, k);
-				x[ind] = dc[j] - cc[j] * x[ind2];
+				x[ind] = dc[j] - (cc[j] * x[ind2]);
 			}
 		}
 	}
@@ -147,12 +174,12 @@ void ddz_solve(const Tridiagonal& t, const float* d, float* x) {
 			for (int k = 1; k < nz - 1; k++) {
 				auto ind = get_index(i, j, k);
 
-				float m = 1.0f / (t.b[k] - t.a[k - 1] * cc[k - 1]);
+				float m = 1.0f / (t.b[k] - (t.a[k - 1] * cc[k - 1]));
 				cc[k] = t.c[k] * m;
-				dc[k] = (d[ind] - t.a[k - 1] * dc[k - 1]) * m;
+				dc[k] = (d[ind] - (t.a[k - 1] * dc[k - 1])) * m;
 			}
 			// Last element of dc
-			dc[nz - 1] = (d[last_ind] - t.a[nz - 2] * dc[nz - 2]) / (t.b[nz - 1] - t.a[nz - 2] * cc[nz - 2]);
+			dc[nz - 1] = (d[last_ind] - (t.a[nz - 2] * dc[nz - 2])) / (t.b[nz - 1] - (t.a[nz - 2] * cc[nz - 2]));
 
 			/* Backwards substitution */
 			// Do last element first
@@ -161,7 +188,7 @@ void ddz_solve(const Tridiagonal& t, const float* d, float* x) {
 			for (int k = nz - 2; k >= 0; k--) {
 				auto ind = get_index(i, j, k);
 				auto ind2 = get_index(i, j, k + 1);
-				x[ind] = dc[k] - cc[k] * x[ind2];
+				x[ind] = dc[k] - (cc[k] * x[ind2]);
 			}
 		}
 	}

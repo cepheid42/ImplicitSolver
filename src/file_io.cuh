@@ -33,15 +33,19 @@ void save_field(const std::string& filename, float* grid) {
 	file.close();
 }
 
+
 void process_ex(const float* Ex, const float* By, const std::string& qs) {
 	auto Excd = new float[nz * ny * nx]{};
 
-	for (int k = 1; k < nz; k++) {
+	for (int k = 1; k < nz - 1; k++) {
 		for (int j = 0; j < ny; j++) {
 			for (int i = 0; i < nx; i++) {
-				auto i1 = get_index(i, j, k    );
-				auto i2 = get_index(i, j, k - 1);
-				Excd[i1] = Ex[i1] + (c1 * ddz * (By[i1] - By[i2]));
+				auto cur_ind = get_index(i, j, k);
+
+				auto next_z = get_index(i, j, k + 1);
+				auto last_z = get_index(i, j, k - 1);
+
+				Excd[cur_ind] = Ex[cur_ind] + (c1 * ddz * (By[next_z] - By[last_z]));
 			}
 		}
 	}
@@ -56,10 +60,13 @@ void process_ey(const float* Ey, const float* Bz, const std::string& qs) {
 
 	for (int k = 0; k < nz; k++) {
 		for (int j = 0; j < ny; j++) {
-			for (int i = 1; i < nx; i++) {
-				auto i1 = get_index(i    , j, k);
-				auto i2 = get_index(i - 1, j, k);
-				Eycd[i1] = Ey[i1] + (c1 * ddx * (Bz[i1] - Bz[i2]));
+			for (int i = 1; i < nx - 1; i++) {
+				auto cur_ind = get_index(i, j, k);
+
+				auto next_x = get_index(i + 1, j, k);
+				auto last_x = get_index(i - 1, j, k);
+
+				Eycd[cur_ind] = Ey[cur_ind] + (c1 * ddx * (Bz[next_x] - Bz[last_x]));
 
 			}
 		}
@@ -76,9 +83,11 @@ void process_ez(const float* Ez, const float* Bx, const std::string& qs) {
 	for (int k = 0; k < nz; k++) {
 		for (int j = 1; j < ny; j++) {
 			for (int i = 0; i < nx; i++) {
-				auto i1 = get_index(i, j, k);
-				auto i2 = get_index(i, j - 1, k);
-				Ezcd[i1] = Ez[i1] + (c1 * ddy * (Bx[i1] - Bx[i2]));
+				auto cur_ind = get_index(i, j, k);
+
+				auto next_y = get_index(i, j - 1, k);
+				auto last_y = get_index(i, j + 1, k);
+				Ezcd[cur_ind] = Ez[cur_ind] + (c1 * ddy * (Bx[next_y] - Bx[last_y]));
 			}
 		}
 	}
@@ -93,6 +102,8 @@ void snapshot(int q, Efield& e, Bfield& b, Source& s) {
 	process_ex(e.Ex, b.By, qs);
 	process_ey(e.Ey, b.Bz, qs);
 	process_ez(e.Ez, b.Bx, qs);
+//	save_onedim("outputs/ez/t" + qs + ".csv", e.Ez);
+//	save_onedim("outputs/jz/t" + qs + ".csv", s.Jz);
 }
 
 #endif //REGIMPLICIT_FILE_IO_H

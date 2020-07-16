@@ -61,6 +61,4 @@ if __name__ == '__main__':
         frames=frames
     )
 
-
-
     fig.show()
