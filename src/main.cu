@@ -8,35 +8,34 @@
 
 using namespace std;
 
-const int step = 10;
+const int step = 350;
 
 void run_loop(Efield& e, Bfield& b, Source& s) {
 	Timer update_loop_timer;
 	update_loop_timer.start();
 
-	Tridiagonal td_x_half(nx);
+	Tridiagonal td_x_half(ny);
 	td_x_half.init(ddy);
 
-	Tridiagonal td_y_half(ny);
+	Tridiagonal td_y_half(nz);
 	td_y_half.init(ddz);
 
-	Tridiagonal td_z_half(nz);
-	td_z_half.init((1.0f / dx));
+	Tridiagonal td_z_half(nx);
+	td_z_half.init(ddx);
 
-	Tridiagonal td_x_one(nx);
+	Tridiagonal td_x_one(nz);
 	td_x_one.init(ddz);
 
-	Tridiagonal td_y_one(ny);
+	Tridiagonal td_y_one(nx);
 	td_y_one.init(ddx);
 
-	Tridiagonal td_z_one(nz);
+	Tridiagonal td_z_one(ny);
 	td_z_one.init(ddy);
 
 	// Begin time loop
 	for (int q = 0; q < nt; q++) {
 		// Source
-		inc_ey(s.Jy, q);
-		inc_ez(s.Jz, q);
+		verify_jz(s.Jz, q);
 
 		// c1 = dt / (2 * eps0)
 		// c2 = dt / (2 * mu0)

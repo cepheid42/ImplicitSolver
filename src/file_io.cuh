@@ -7,9 +7,10 @@
 
 void save_params(int step) {
 	std::ofstream file("outputs/params.csv");
+	file << std::setprecision(std::numeric_limits<float>::max_digits10);
 	file << nx << ", " << ny << ", " << nz << "\n"
 	     << dx << ", " << dy << ", " << dz << "\n"
-	     << nt << "\n"
+	     << nt << ", " << "\n"
 	     << step << std::endl;
 	file.close();
 }
@@ -99,11 +100,9 @@ void process_ez(const float* Ez, const float* Bx, const std::string& qs) {
 void snapshot(int q, Efield& e, Bfield& b, Source& s) {
 	std::string qs = std::to_string(q);
 
-	process_ex(e.Ex, b.By, qs);
-	process_ey(e.Ey, b.Bz, qs);
+//	process_ex(e.Ex, b.By, qs);
+//	process_ey(e.Ey, b.Bz, qs);
 	process_ez(e.Ez, b.Bx, qs);
-//	save_onedim("outputs/ez/t" + qs + ".csv", e.Ez);
-//	save_onedim("outputs/jz/t" + qs + ".csv", s.Jz);
 }
 
 #endif //REGIMPLICIT_FILE_IO_H
