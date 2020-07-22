@@ -10,7 +10,7 @@ void save_params(int step) {
 	file << std::setprecision(std::numeric_limits<float>::max_digits10);
 	file << nx << ", " << ny << ", " << nz << "\n"
 	     << dx << ", " << dy << ", " << dz << "\n"
-	     << nt << ", " << "\n"
+	     << nt << ", " << dt << "\n"
 	     << step << std::endl;
 	file.close();
 }
@@ -102,7 +102,8 @@ void snapshot(int q, Efield& e, Bfield& b, Source& s) {
 
 //	process_ex(e.Ex, b.By, qs);
 //	process_ey(e.Ey, b.Bz, qs);
-	process_ez(e.Ez, b.Bx, qs);
+//	process_ez(e.Ez, b.Bx, qs);
+	save_field("outputs/ez/t" + qs + ".csv", e.Ez);
 }
 
 #endif //REGIMPLICIT_FILE_IO_H

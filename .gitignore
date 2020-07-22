@@ -1,6 +1,7 @@
 .idea
 outputs
 cmake-build-debug
+ez*/
 
 CMakeLists.txt
 a.out

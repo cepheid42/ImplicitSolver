@@ -10,14 +10,20 @@
 void implicit_ex_half(float* ex, const float* Ex, const float* Bz, const float* Jx) {
 	for (auto k = 0; k < nz; k++) {             // [0, nz)
 		for (auto j = 1; j < ny - 1; j++) {     // [1, ny - 1)
-			for (auto i = 1; i < nx; i++) {     // [1, nx)
+			for (auto i = 0; i < nx; i++) {     // [0, nx)
 				auto cur_ind = get_index(i, j, k);
-				auto last_ind = get_index(i - 1, j, k);
 
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				ex[cur_ind] = Ex[cur_ind] + (c1 * ddy * (Bz[next_y] - Bz[last_y])) - (c1 * Jx[last_ind]);
+				auto temp = Ex[cur_ind] + (c1 * ddy * (Bz[next_y] - Bz[last_y])) - (c1 * Jx[cur_ind]);
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in implicit_ex_half." << std::endl;
+					std::exit(0);
+				}
+
+				ex[cur_ind] = temp;
 			}
 		}
 	}
@@ -26,15 +32,20 @@ void implicit_ex_half(float* ex, const float* Ex, const float* Bz, const float* 
 // ey = Ey + c1 * ddz * Bx - c1 * Jy
 void implicit_ey_half(float* ey, const float* Ey, const float* Bx, const float* Jy) {
 	for (auto k = 1; k < nz - 1; k++) {         // [1, nz - 1)
-		for (auto j = 1; j < ny; j++) {         // [1, ny)
+		for (auto j = 0; j < ny; j++) {         // [0, ny)
 			for (auto i = 0; i < nx; i++) {     // [0, nx)
 				auto cur_ind = get_index(i, j, k);
-				auto last_ind = get_index(i, j - 1, k);
 
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				ey[cur_ind] = Ey[cur_ind] + (c1 * ddz * (Bx[next_z] - Bx[last_z])) - (c1 * Jy[last_ind]);
+				auto temp = Ey[cur_ind] + (c1 * ddz * (Bx[next_z] - Bx[last_z])) - (c1 * Jy[cur_ind]);
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in implicit_ey_half." << std::endl;
+					std::exit(0);
+				}
+				ey[cur_ind] = temp;
 			}
 		}
 	}
@@ -42,16 +53,21 @@ void implicit_ey_half(float* ey, const float* Ey, const float* Bx, const float* 
 
 // ez = Ez + c1 * ddx * By - c1 * Jz
 void implicit_ez_half(float* ez, const float* Ez, const float* By, const float* Jz) {
-	for (auto k = 1; k < nz; k++) {                 // [1, nz)
+	for (auto k = 0; k < nz; k++) {                 // [0, nz)
 		for (auto j = 0; j < ny; j++) {             // [0, ny)
 			for (auto i = 1; i < nx - 1; i++) {     // [1, nx - 1)
 				auto cur_ind = get_index(i, j, k);
-				auto last_ind = get_index(i, j, k - 1);
 
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				ez[cur_ind] = Ez[cur_ind] + (c1 * ddx * (By[next_x] - By[last_x])) - (c1 * Jz[last_ind]);
+				auto temp = Ez[cur_ind] + (c1 * ddx * (By[next_x] - By[last_x])) - (c1 * Jz[cur_ind]);
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in implicit_ez_half." << std::endl;
+					std::exit(0);
+				}
+				ez[cur_ind] = temp;
 			}
 		}
 	}
@@ -68,7 +84,14 @@ void implicit_ex_one(float* ex, const float* Ex, const float* By) {
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				ex[cur_ind] =  Ex[cur_ind] - (c1 * ddz * (By[next_z] - By[last_z]));
+				auto temp =  Ex[cur_ind] - (c1 * ddz * (By[next_z] - By[last_z]));
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in implicit_ex_one." << std::endl;
+					std::exit(0);
+				}
+
+				ex[cur_ind] = temp;
 			}
 		}
 	}
@@ -84,7 +107,14 @@ void implicit_ey_one(float* ey, const float* Ey, const float* Bz) {
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				ey[cur_ind] = Ey[cur_ind] - (c1 * ddx * (Bz[next_x] - Bz[last_x]));
+				auto temp = Ey[cur_ind] - (c1 * ddx * (Bz[next_x] - Bz[last_x]));
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in implicit_ey_one." << std::endl;
+					std::exit(0);
+				}
+
+				ey[cur_ind] = temp;
 			}
 		}
 	}
@@ -100,7 +130,15 @@ void implicit_ez_one(float* ez, const float* Ez, const float* Bx) {
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				ez[cur_ind] = Ez[cur_ind] - (c1 * ddy * (Bx[next_y] - Bx[last_y]));
+				auto temp = Ez[cur_ind] - (c1 * ddy * (Bx[next_y] - Bx[last_y]));
+
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in implicit_ez_one." << std::endl;
+					std::exit(0);
+				}
+
+				ez[cur_ind] = temp;
 			}
 		}
 	}
@@ -113,7 +151,13 @@ void explicit_E(float* E, const float* e) {
 		for (auto j = 0; j < ny; j++) {
 			for (auto i = 0; i < nx; i++) {
 				auto ind = get_index(i, j, k);
-				E[ind] = e[ind] - E[ind];
+				auto temp = e[ind] - E[ind];
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in explicit_E." << std::endl;
+					std::exit(0);
+				}
+				E[ind] = temp;
 			}
 		}
 	}
@@ -131,7 +175,14 @@ void explicit_bx_half(float* Bx, const float* ey) {
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				Bx[cur_ind] = Bx[cur_ind] + (c2 * ddz * (ey[next_z] - ey[last_z]));
+				auto temp = Bx[cur_ind] + (c2 * ddz * (ey[next_z] - ey[last_z]));
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in explicit_bx_half." << std::endl;
+					std::exit(0);
+				}
+
+				Bx[cur_ind] = temp;
 			}
 		}
 	}
@@ -147,7 +198,14 @@ void explicit_by_half(float* By, const float* ez) {
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				By[cur_ind] = By[cur_ind] + (c2 * ddx * (ez[next_x] - ez[last_x]));
+				auto temp = By[cur_ind] + (c2 * ddx * (ez[next_x] - ez[last_x]));
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in explicit_by_half." << std::endl;
+					std::exit(0);
+				}
+
+				By[cur_ind] = temp;
 			}
 		}
 	}
@@ -163,7 +221,14 @@ void explicit_bz_half(float* Bz, const float* ex) {
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				Bz[cur_ind] = Bz[cur_ind] + (c2 * ddy * (ex[next_y] - ex[last_y]));
+				auto temp = Bz[cur_ind] + (c2 * ddy * (ex[next_y] - ex[last_y]));
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in explicit_bz_half." << std::endl;
+					std::exit(0);
+				}
+
+				Bz[cur_ind] = temp;
 			}
 		}
 	}
@@ -180,7 +245,14 @@ void explicit_bx_one(float* Bx, const float* ez) {
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				Bx[cur_ind] = Bx[cur_ind] - (c2 * ddy * (ez[next_y] - ez[last_y]));
+				auto temp = Bx[cur_ind] - (c2 * ddy * (ez[next_y] - ez[last_y]));
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in explicit_bx_one." << std::endl;
+					std::exit(0);
+				}
+
+				Bx[cur_ind] = temp;
 			}
 		}
 	}
@@ -196,7 +268,14 @@ void explicit_by_one(float* By, const float* ex) {
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				By[cur_ind] = By[cur_ind] - (c2 * ddz * (ex[next_z] - ex[last_z]));
+				auto temp = By[cur_ind] - (c2 * ddz * (ex[next_z] - ex[last_z]));
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in explicit_by_one." << std::endl;
+					std::exit(0);
+				}
+
+				By[cur_ind] = temp;
 			}
 		}
 	}
@@ -212,7 +291,14 @@ void explicit_bz_one(float* Bz, const float* ey) {
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				Bz[cur_ind] = Bz[cur_ind] - (c2 * ddx * (ey[next_x] - ey[last_x]));
+				auto temp = Bz[cur_ind] - (c2 * ddx * (ey[next_x] - ey[last_x]));
+
+				if (std::isnan(temp) || std::isinf(temp)) {
+					std::cout << "NaN/Infinity in explicit_bz_one." << std::endl;
+					std::exit(0);
+				}
+
+				Bz[cur_ind] = temp;
 			}
 		}
 	}

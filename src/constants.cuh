@@ -19,42 +19,31 @@ const float eps0 = 8.85418782e-12f;  // F/m
 const float mu0  = 1.25663706e-6f;   // H/m
 const float pi = 3.1415926535f;
 
-//const float freq = 14.0e6f;
-//const float lambda = c0 / freq;
-//const float T    = 1.0f / freq;
-//const float t0   = 3.0f * T;
-//const float sig0 = 1.0f * T;
-//const float n0   = 2.0f;
-//const float ez0 = 140.0f/ 1.0f; // V/m
+const float freq   = 14.0e6f;
+const float lambda = c0 / freq;
+const float T      = 1.0f / freq;
+const float t0     = 3.0f * T;
+const float sig0   = 1.0f * T;
+const float n0     = 2.0f;
+const float ez0    = 140.0f / 1.0f; // V/m
 
 /* ====== Spatial Constants ====== */
 const int x_resolution = 16;
 const int num_wavelengths = 6;
 
-const int nx = 50;
-const int ny = 50;
-const int nz = 50;
+const int nx = num_wavelengths * x_resolution + 1;
+const int ny = nx;
+const int nz = nx;
 
-const float dx = 0.02; // 2 mm
+const float dx = (num_wavelengths * lambda - 0.0f) / float(nx - 1);
 const float dy = dx;
 const float dz = dx;
 
 /* ====== Temporal Constants ====== */
 // Courant number
-const float cfl = 1.0f;
-const float dt = dx / (c0 * 1.732050807569f);  // ~= dx / (c * sqrt(3))
-
-/*
- * The CFL number (S_c) is defined as (dt / dt_cfl) in the paper
- * Since S_c == 1.0, dt == dt_cfl
- *
- * if S_c == 4.0 (later in paper), then what would dt be? Is dt_cfl a constant number?
- */
-
-const int nt = 38944;  // 150 ns / dt
-
-const float tau = 1.5e-10f; // 150 ps
-const float t0 = 3 * tau;
+const float cfl = 0.7f;
+const float dt = cfl * dx / c0;
+const int nt = int(num_wavelengths * lambda / (c0 * dt)) + 1;
 
 /* ====== Derivative Coefficients ====== */
 const float ddx = 1.0f / dx;
