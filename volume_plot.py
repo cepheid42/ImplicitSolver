@@ -31,7 +31,7 @@ def get_files(folder, p):
     store = []
 
     for q in range(0, p.nt, p.step):
-        filename = f'outputs/{folder}/t{q}.csv'
+        filename = f'{folder}/t{q}.csv'
         try:
             temp = np.genfromtxt(filename, delimiter=',', dtype=np.float32).reshape((p.nz, p.ny, p.nx))
             store.append(temp)
@@ -78,6 +78,10 @@ def stacked_line(files, p):
 
 if __name__ == '__main__':
     params = Params()
-    ez_files = get_files('ez', params)
+    new_ez = 'outputs/ez'
+    old_ez1 = 'ez_all_jz_1'
+    old_ez2 = 'ez_all_jz_1_then_0'
+
+    ez_files = get_files(new_ez, params)
 
     stacked_line(ez_files, params)

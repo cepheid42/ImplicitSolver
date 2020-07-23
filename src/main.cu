@@ -26,7 +26,10 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 	for (int q = 0; q < nt; q++) {
 		// Sources
 		auto ind = get_index(int(nx / 2), int(ny / 2), int(nz / 2));
-		s.Jz[ind] = 1.0f;
+		e.Ez[ind] = std::sin(2.0f * pi * freq * float(q) * dt);
+
+		cout << e.Ex[ind] << " " << e.Ey[ind] << " " << e.Ez[ind] << endl;
+		cout << b.Bx[ind] << " " << b.By[ind] << " " << b.Bz[ind] << endl;
 
 		// c1 = dt / (2 * eps0)
 		// c2 = dt / (2 * mu0)
@@ -73,7 +76,7 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 
 		if (q % step == 0) {
 			cout << q << "/" << nt << ": " << fixed << setprecision(3) << update_loop_timer.split() << "s" << endl;
-			snapshot(q, e, b, s);
+//			snapshot(q, e, b, s);
 		}
 	}
 	update_loop_timer.stop();

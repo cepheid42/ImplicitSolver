@@ -41,7 +41,7 @@ const float dz = dx;
 
 /* ====== Temporal Constants ====== */
 // Courant number
-const float cfl = 0.7f;
+const float cfl = 0.35f;
 const float dt = cfl * dx / c0;
 const int nt = int(num_wavelengths * lambda / (c0 * dt)) + 1;
 

@@ -100,10 +100,10 @@ void process_ez(const float* Ez, const float* Bx, const std::string& qs) {
 void snapshot(int q, Efield& e, Bfield& b, Source& s) {
 	std::string qs = std::to_string(q);
 
-//	process_ex(e.Ex, b.By, qs);
-//	process_ey(e.Ey, b.Bz, qs);
-//	process_ez(e.Ez, b.Bx, qs);
-	save_field("outputs/ez/t" + qs + ".csv", e.Ez);
+	process_ex(e.Ex, b.By, qs);
+	process_ey(e.Ey, b.Bz, qs);
+	process_ez(e.Ez, b.Bx, qs);
+//	save_field("outputs/ez/t" + qs + ".csv", e.Ez);
 }
 
 #endif //REGIMPLICIT_FILE_IO_H
