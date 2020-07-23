@@ -25,7 +25,8 @@ const float T      = 1.0f / freq;
 const float t0     = 3.0f * T;
 const float sig0   = 1.0f * T;
 const float n0     = 2.0f;
-const float ez0    = 140.0f / 1.0f; // V/m
+
+const float ez0    = 1.0f; // V/m
 
 /* ====== Spatial Constants ====== */
 const int x_resolution = 16;
@@ -52,6 +53,11 @@ const float ddz = 1.0f / dz;
 
 const float c1 = dt / (2.0f * eps0);
 const float c2 = dt / (2.0f * mu0);
+
+/* ====== Helpful Constants ====== */
+const int half_nx = int(nx / 2);
+const int half_ny = int(ny / 2);
+const int half_nz = int(ny / 2);
 
 /* ===== Timer struct ===== */
 struct Timer {
@@ -83,6 +89,14 @@ struct Timer {
 /* ===== Utility Functions ===== */
 inline unsigned get_index(unsigned i, unsigned j, unsigned k) {
 	return i + (nx * j) + (nx * ny * k);
+}
+
+inline unsigned yz_middle() {
+	return 0 + (nx * int(ny / 2)) + (nx * ny * int(nz / 2));
+}
+
+inline unsigned true_middle() {
+	return int(nx / 2) + int(nx * (ny / 2)) + (nx * ny * int(nz / 2));
 }
 
 #endif //REGIMPLICIT_CONSTANTS_H

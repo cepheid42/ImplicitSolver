@@ -1,5 +1,8 @@
 import numpy as np
 import plotly.graph_objs as go
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 
 class Params:
     def __init__(self):
@@ -35,6 +38,7 @@ def get_files(folder, p):
         try:
             temp = np.genfromtxt(filename, delimiter=',', dtype=np.float32).reshape((p.nz, p.ny, p.nx))
             store.append(temp)
+            print(f'{q}/{p.nt}')
         except:
             print(f'Unable to open file {filename}. Continuing.')
             continue
@@ -62,6 +66,10 @@ def animated_surface(files, p):
 
     fig.show()
 
+def surface_plot(data, p):
+    fig = go.Figure(data=go.Surface(z=data))
+    fig.show()
+
 def stacked_line(files, p):
     lines = []
 
@@ -75,13 +83,34 @@ def stacked_line(files, p):
 
     fig.show()
 
+def line_plot_active(folder, p):
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    def animate(i):
+        filename = f'{folder}/t{i}.csv'
+        yar = []
+        while True:
+            try:
+                dataArray = np.genfromtxt(filename, delimiter=',', dtype=np.float32).reshape((p.nz, p.ny, p.nx))
+                yar = dataArray[p.nz // 2, p.ny // 2, :]
+            except:
+                continue
+            break
+        xar = np.arange(p.nx)
+        ax1.clear()
+        ax1.plot(xar, yar)
+        ax1.annotate(f'Time Step: {i}', xy=(0.7, 0.9), xycoords='axes fraction', annotation_clip=False)
+
+    anim = animation.FuncAnimation(fig, animate, interval=1000)
+    plt.show()
 
 if __name__ == '__main__':
     params = Params()
     new_ez = 'outputs/ez'
-    old_ez1 = 'ez_all_jz_1'
-    old_ez2 = 'ez_all_jz_1_then_0'
 
     ez_files = get_files(new_ez, params)
 
+    # surface_plot(ez_files[0][:, params.ny // 2, :], params)
+    # animated_surface(ez_files, params)
     stacked_line(ez_files, params)
+    # line_plot_active(new_ez, params)
