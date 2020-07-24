@@ -11,27 +11,29 @@ void punch_out(const float* grid, int i, int j, int k) {
 	auto minus_y = get_index(i    , j - 1, k);
 	auto plus_z  = get_index(i    , j    , k + 1);
 	auto minus_z = get_index(i    , j    , k - 1);
-	std::cout<< std::fixed                                         << "+z:\t\t      "
-							<< grid[plus_z]                        << "\n+y:\t     "
-							<< grid[plus_y]                        << "\n x: "
-	<< grid[minus_x] << " " << grid[center] << " " << grid[plus_x] << "\n-y:\t     "
-							<< grid[minus_y]                       << "\n-z: "
-							<< grid[minus_z]                       << std::endl;
+	std::cout<< std::fixed
+	<< "+z: " << grid[plus_z] << "\n"
+	<< "+y: " << grid[plus_y] << "\n"
+	<< "+x: " << grid[plus_x] << "\n"
+	<< " 0: " << grid[center] << "\n"
+	<< "-x: " << grid[minus_x] << "\n"
+	<< "-y: " << grid[minus_y] << "\n"
+	<< "-z: " << grid[minus_z] << std::endl;
 }
 
 #define check(grid, val, ind) { checkVal((grid), (val), (ind), __FILE__, __LINE__); }
 void checkVal(const float* grid, float val, int ind, const char* file, int line) {
-	if (val > ez0) {
-		auto i = ind / (nx * ny);
-		auto j = (ind / nz) % ny;
-		auto k = ind % nz;
+//	if (val > ez0) {
+//		auto i = ind / (nx * ny);
+//		auto j = (ind / nz) % ny;
+//		auto k = ind % nz;
+//
+//		fprintf(stderr, "%s:%d: element > ez0 at index %d (%d, %d, %d)\n", file, line, ind, i, j, k);
+//		punch_out(grid, i, j ,k);
+//		std::exit(0);
+//	}
 
-		fprintf(stderr, "%s:%d: element > ez0 at index %d (%d, %d, %d)\n", file, line, ind, i, j, k);
-		punch_out(grid, i, j ,k);
-		std::exit(0);
-	}
-
-	else if (std::isnan(val) || std::isinf(val)) {
+	if (std::isnan(val) || std::isinf(val)) {
 		auto i = ind / (nx * ny);
 		auto j = (ind / nz) % ny;
 		auto k = ind % nz;
@@ -51,7 +53,6 @@ void implicit_ex_half(float* ex, const float* Ex, const float* Bz, const float* 
 		for (auto j = 1; j < ny - 1; j++) {     // [1, ny - 1)
 			for (auto i = 0; i < nx; i++) {     // [0, nx)
 				auto cur_ind = get_index(i, j, k);
-
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 

@@ -19,14 +19,14 @@ const float eps0 = 8.85418782e-12f;  // F/m
 const float mu0  = 1.25663706e-6f;   // H/m
 const float pi = 3.1415926535f;
 
-const float freq   = 14.0e6f;
-const float lambda = c0 / freq;
-const float T      = 1.0f / freq;
-const float t0     = 3.0f * T;
+const float freq   = 1.4e7f;         // 14 MHz
+const float lambda = c0 / freq;      // 21.41 m
+const float T      = 1.0f / freq;    // 71.43 ns
+//const float t0     = 3.0f * T;
 const float sig0   = 1.0f * T;
 const float n0     = 2.0f;
 
-const float ez0    = 1.0f; // V/m
+const float ez0    = 144.0f; // V/m
 
 /* ====== Spatial Constants ====== */
 const int x_resolution = 16;
@@ -46,6 +46,8 @@ const float cfl = 0.35f;
 const float dt = cfl * dx / c0;
 const int nt = int(num_wavelengths * lambda / (c0 * dt)) + 1;
 
+const float tau = 1.5e-10;
+const float t0 = 3 * tau;
 /* ====== Derivative Coefficients ====== */
 const float ddx = 1.0f / dx;
 const float ddy = 1.0f / dy;

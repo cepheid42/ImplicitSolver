@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const int step = 1;
+const int step = 10;
 
 void run_loop(Efield& e, Bfield& b, Source& s) {
 	Timer update_loop_timer;
@@ -24,14 +24,12 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 
 	// Begin time loop
 	for (int q = 0; q < nt; q++) {
-		cout << q << "/" << nt << endl;
-
 		// Sources
 //		inc_ey(e.Ey, q);
 //		inc_ez(e.Ez, q);
 		auto ind = true_middle();
-		e.Ez[ind] = ez0 * std::sin(2.0f * pi * freq * float(q) * dt);
-		punch_out(e.Ez, half_nx, half_ny, half_nz);
+		auto a = ((float(q) * dt) - t0) / tau;
+		s.Jz[ind] = a * exp(-1.0f * (a * a));
 
 		// c1 = dt / (2 * eps0)
 		// c2 = dt / (2 * mu0)
@@ -76,10 +74,10 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 		explicit_by_one(b.By, e.ex); // By = By - c2 * ddz * ex
 		explicit_bz_one(b.Bz, e.ey); // Bz = Bz - c2 * ddx * ey
 
-//		if (q % step == 0) {
-//			cout << "snapshot taken." << endl;
-//			snapshot(q, e, b, s);
-//		}
+		if (q % step == 0) {
+			cout << q << "/" << nt << ": snapshot taken (" << update_loop_timer.split() << "s)" << endl;
+			snapshot(q, e, b, s);
+		}
 	}
 	update_loop_timer.stop();
 	cout << "Total loop time: " << setprecision(3) << update_loop_timer.total << "s" << endl;

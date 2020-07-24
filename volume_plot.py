@@ -31,14 +31,16 @@ class Params:
 
 
 def get_files(folder, p):
+    print(f'Reading from "{folder}"')
     store = []
 
     for q in range(0, p.nt, p.step):
+        print(f'File "t{q}.csv"')
         filename = f'{folder}/t{q}.csv'
+
         try:
             temp = np.genfromtxt(filename, delimiter=',', dtype=np.float32).reshape((p.nz, p.ny, p.nx))
             store.append(temp)
-            print(f'{q}/{p.nt}')
         except:
             print(f'Unable to open file {filename}. Continuing.')
             continue
@@ -70,7 +72,7 @@ def surface_plot(data, p):
     fig = go.Figure(data=go.Surface(z=data))
     fig.show()
 
-def stacked_line(files, p):
+def stacked_line(name, files, p):
     lines = []
 
     for f in files:
@@ -81,6 +83,7 @@ def stacked_line(files, p):
     for l in range(1, len(lines) - 1):
         fig.add_trace(lines[l])
 
+    fig.update_layout(title=name)
     fig.show()
 
 def line_plot_active(folder, p):
@@ -106,11 +109,21 @@ def line_plot_active(folder, p):
 
 if __name__ == '__main__':
     params = Params()
-    new_ez = 'outputs/ez'
 
-    ez_files = get_files(new_ez, params)
+    ex_files = get_files('outputs/ex', params)
+    ey_files = get_files('outputs/ey', params)
+    ez_files = get_files('outputs/ez', params)
+    bx_files = get_files('outputs/bx', params)
+    by_files = get_files('outputs/by', params)
+    bz_files = get_files('outputs/bz', params)
+
+    stacked_line("ex", ex_files, params)
+    stacked_line("ey", ey_files, params)
+    stacked_line("ez", ez_files, params)
+    stacked_line("bx", bx_files, params)
+    stacked_line("by", by_files, params)
+    stacked_line("bz", bz_files, params)
 
     # surface_plot(ez_files[0][:, params.ny // 2, :], params)
     # animated_surface(ez_files, params)
-    stacked_line(ez_files, params)
     # line_plot_active(new_ez, params)
