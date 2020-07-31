@@ -45,7 +45,7 @@ void process_ex(const float* Ex, const float* By, const std::string& qs) {
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				Excd[cur_ind] = Ex[cur_ind] + (c1 * ddz * (By[next_z] - By[last_z]));
+				Excd[cur_ind] = Ex[cur_ind] + (c1 * dz * (By[next_z] - By[last_z]));
 			}
 		}
 	}
@@ -65,7 +65,7 @@ void process_ey(const float* Ey, const float* Bz, const std::string& qs) {
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				Eycd[cur_ind] = Ey[cur_ind] + (c1 * ddx * (Bz[next_x] - Bz[last_x]));
+				Eycd[cur_ind] = Ey[cur_ind] + (c1 * dx * (Bz[next_x] - Bz[last_x]));
 
 			}
 		}
@@ -86,7 +86,7 @@ void process_ez(const float* Ez, const float* Bx, const std::string& qs) {
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				Ezcd[cur_ind] = Ez[cur_ind] + (c1 * ddy * (Bx[next_y] - Bx[last_y]));
+				Ezcd[cur_ind] = Ez[cur_ind] + (c1 * dy * (Bx[next_y] - Bx[last_y]));
 			}
 		}
 	}
@@ -105,7 +105,7 @@ void process_bx(const float* Bx, const float* Ez, const std::string& qs) {
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				Bxcd[cur_ind] = Bx[cur_ind] + (c2 * ddy * (Ez[next_y] - Ez[last_y]));
+				Bxcd[cur_ind] = Bx[cur_ind] + (c2 * dy * (Ez[next_y] - Ez[last_y]));
 			}
 		}
 	}
@@ -124,7 +124,7 @@ void process_by(const float* By, const float* Ex, const std::string& qs) {
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				Bycd[cur_ind] = By[cur_ind] + (c2 * ddz * (Ex[next_z] - Ex[last_z]));
+				Bycd[cur_ind] = By[cur_ind] + (c2 * dz * (Ex[next_z] - Ex[last_z]));
 			}
 		}
 	}
@@ -143,7 +143,7 @@ void process_bz(const float* Bz, const float* Ey, const std::string& qs) {
 				auto next_y = get_index(i + 1, j, k);
 				auto last_y = get_index(i - 1, j, k);
 
-				Bzcd[cur_ind] = Bz[cur_ind] + (c2 * ddx * (Ey[next_y] - Ey[last_y]));
+				Bzcd[cur_ind] = Bz[cur_ind] + (c2 * dx * (Ey[next_y] - Ey[last_y]));
 			}
 		}
 	}

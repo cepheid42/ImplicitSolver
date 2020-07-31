@@ -46,13 +46,7 @@ const float cfl = 0.35f;
 const float dt = cfl * dx / c0;
 const int nt = int(num_wavelengths * lambda / (c0 * dt)) + 1;
 
-const float tau = 1.5e-10;
-const float t0 = 3 * tau;
 /* ====== Derivative Coefficients ====== */
-const float ddx = 1.0f / dx;
-const float ddy = 1.0f / dy;
-const float ddz = 1.0f / dz;
-
 const float c1 = dt / (2.0f * eps0);
 const float c2 = dt / (2.0f * mu0);
 
@@ -60,6 +54,9 @@ const float c2 = dt / (2.0f * mu0);
 const int half_nx = int(nx / 2);
 const int half_ny = int(ny / 2);
 const int half_nz = int(ny / 2);
+
+//const float tau = 1.5e-10;
+//const float t0 = 3 * tau;
 
 /* ===== Timer struct ===== */
 struct Timer {

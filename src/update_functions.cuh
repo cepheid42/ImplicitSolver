@@ -23,15 +23,15 @@ void punch_out(const float* grid, int i, int j, int k) {
 
 #define check(grid, val, ind) { checkVal((grid), (val), (ind), __FILE__, __LINE__); }
 void checkVal(const float* grid, float val, int ind, const char* file, int line) {
-//	if (val > ez0) {
-//		auto i = ind / (nx * ny);
-//		auto j = (ind / nz) % ny;
-//		auto k = ind % nz;
-//
-//		fprintf(stderr, "%s:%d: element > ez0 at index %d (%d, %d, %d)\n", file, line, ind, i, j, k);
-//		punch_out(grid, i, j ,k);
-//		std::exit(0);
-//	}
+	if (val > ez0) {
+		auto i = ind / (nx * ny);
+		auto j = (ind / nz) % ny;
+		auto k = ind % nz;
+
+		fprintf(stderr, "%s:%d: element > ez0 at index %d (%d, %d, %d)\n", file, line, ind, i, j, k);
+		punch_out(grid, i, j ,k);
+		std::exit(0);
+	}
 
 	if (std::isnan(val) || std::isinf(val)) {
 		auto i = ind / (nx * ny);
@@ -47,7 +47,7 @@ void checkVal(const float* grid, float val, int ind, const char* file, int line)
 
 /* ===== Implicit electric field updates ===== */
 /* N -> N + 1/2 */
-// ex = Ex + c1 * ddy * Bz - c1 * Jx
+// ex = Ex + c1 * dy * Bz - c1 * Jx
 void implicit_ex_half(float* ex, const float* Ex, const float* Bz, const float* Jx) {
 	for (auto k = 0; k < nz; k++) {             // [0, nz)
 		for (auto j = 1; j < ny - 1; j++) {     // [1, ny - 1)
@@ -56,7 +56,7 @@ void implicit_ex_half(float* ex, const float* Ex, const float* Bz, const float* 
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				auto temp = Ex[cur_ind] + (c1 * ddy * (Bz[next_y] - Bz[last_y])) - (c1 * Jx[cur_ind]);
+				auto temp = Ex[cur_ind] + (c1 * dy * (Bz[next_y] - Bz[last_y])) - (c1 * Jx[cur_ind]);
 
 				check(Ex, temp, cur_ind)
 
@@ -66,7 +66,7 @@ void implicit_ex_half(float* ex, const float* Ex, const float* Bz, const float* 
 	}
 }
 
-// ey = Ey + c1 * ddz * Bx - c1 * Jy
+// ey = Ey + c1 * dz * Bx - c1 * Jy
 void implicit_ey_half(float* ey, const float* Ey, const float* Bx, const float* Jy) {
 	for (auto k = 1; k < nz - 1; k++) {         // [1, nz - 1)
 		for (auto j = 0; j < ny; j++) {         // [0, ny)
@@ -76,7 +76,7 @@ void implicit_ey_half(float* ey, const float* Ey, const float* Bx, const float* 
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				auto temp = Ey[cur_ind] + (c1 * ddz * (Bx[next_z] - Bx[last_z])) - (c1 * Jy[cur_ind]);
+				auto temp = Ey[cur_ind] + (c1 * dz * (Bx[next_z] - Bx[last_z])) - (c1 * Jy[cur_ind]);
 
 				check(Ey, temp, cur_ind)
 
@@ -86,7 +86,7 @@ void implicit_ey_half(float* ey, const float* Ey, const float* Bx, const float* 
 	}
 }
 
-// ez = Ez + c1 * ddx * By - c1 * Jz
+// ez = Ez + c1 * dx * By - c1 * Jz
 void implicit_ez_half(float* ez, const float* Ez, const float* By, const float* Jz) {
 	for (auto k = 0; k < nz; k++) {                 // [0, nz)
 		for (auto j = 0; j < ny; j++) {             // [0, ny)
@@ -96,7 +96,7 @@ void implicit_ez_half(float* ez, const float* Ez, const float* By, const float* 
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				auto temp = Ez[cur_ind] + (c1 * ddx * (By[next_x] - By[last_x])) - (c1 * Jz[cur_ind]);
+				auto temp = Ez[cur_ind] + (c1 * dx * (By[next_x] - By[last_x])) - (c1 * Jz[cur_ind]);
 
 				check(Ez, temp, cur_ind)
 
@@ -107,7 +107,7 @@ void implicit_ez_half(float* ez, const float* Ez, const float* By, const float* 
 }
 
 /* N + 1/2 -> N + 1 */
-// ex = Ex - c1 * ddz * By
+// ex = Ex - c1 * dz * By
 void implicit_ex_one(float* ex, const float* Ex, const float* By) {
 	for (auto k = 1; k < nz - 1; k++) {         // [1, nz - 1)
 		for (auto j = 0; j < ny; j++) {         // [0, ny)
@@ -117,7 +117,7 @@ void implicit_ex_one(float* ex, const float* Ex, const float* By) {
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				auto temp =  Ex[cur_ind] - (c1 * ddz * (By[next_z] - By[last_z]));
+				auto temp =  Ex[cur_ind] - (c1 * dz * (By[next_z] - By[last_z]));
 
 				check(Ex, temp, cur_ind)
 
@@ -127,7 +127,7 @@ void implicit_ex_one(float* ex, const float* Ex, const float* By) {
 	}
 }
 
-// ey = Ey - c1 * ddx * Bz
+// ey = Ey - c1 * dx * Bz
 void implicit_ey_one(float* ey, const float* Ey, const float* Bz) {
 	for (auto k = 0; k < nz; k++) {                 // [0, nz)
 		for (auto j = 0; j < ny; j++) {             // [0, ny)
@@ -137,7 +137,7 @@ void implicit_ey_one(float* ey, const float* Ey, const float* Bz) {
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				auto temp = Ey[cur_ind] - (c1 * ddx * (Bz[next_x] - Bz[last_x]));
+				auto temp = Ey[cur_ind] - (c1 * dx * (Bz[next_x] - Bz[last_x]));
 
 				check(Ey, temp, cur_ind)
 
@@ -147,7 +147,7 @@ void implicit_ey_one(float* ey, const float* Ey, const float* Bz) {
 	}
 }
 
-// ez = Ez - c1 * ddy * Bx
+// ez = Ez - c1 * dy * Bx
 void implicit_ez_one(float* ez, const float* Ez, const float* Bx) {
 	for (auto k = 0; k < nz; k++) {             // [0, nz)
 		for (auto j = 1; j < ny - 1; j++) {     // [1, ny - 1)
@@ -157,7 +157,7 @@ void implicit_ez_one(float* ez, const float* Ez, const float* Bx) {
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				auto temp = Ez[cur_ind] - (c1 * ddy * (Bx[next_y] - Bx[last_y]));
+				auto temp = Ez[cur_ind] - (c1 * dy * (Bx[next_y] - Bx[last_y]));
 
 				check(Ez, temp, cur_ind)
 
@@ -186,7 +186,7 @@ void explicit_E(float* E, const float* e) {
 
 /* ===== Explicit Magnetic Field Updates ===== */
 /* N -> N + 1/2 */
-// Bx = Bx + c2 * ddz * ey
+// Bx = Bx + c2 * dz * ey
 void explicit_bx_half(float* Bx, const float* ey) {
 	for (auto k = 1; k < nz - 1; k++) {         // [1, nz - 1)
 		for (auto j = 0; j < ny; j++) {         // [0, ny)
@@ -196,7 +196,7 @@ void explicit_bx_half(float* Bx, const float* ey) {
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				auto temp = Bx[cur_ind] + (c2 * ddz * (ey[next_z] - ey[last_z]));
+				auto temp = Bx[cur_ind] + (c2 * dz * (ey[next_z] - ey[last_z]));
 
 				check(Bx, temp, cur_ind)
 
@@ -206,7 +206,7 @@ void explicit_bx_half(float* Bx, const float* ey) {
 	}
 }
 
-// By = By + c2 * ddx * ez
+// By = By + c2 * dx * ez
 void explicit_by_half(float* By, const float* ez) {
 	for (auto k = 0; k < nz; k++) {                 // [0, nz)
 		for (auto j = 0; j < ny; j++) {             // [0, ny)
@@ -216,7 +216,7 @@ void explicit_by_half(float* By, const float* ez) {
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				auto temp = By[cur_ind] + (c2 * ddx * (ez[next_x] - ez[last_x]));
+				auto temp = By[cur_ind] + (c2 * dx * (ez[next_x] - ez[last_x]));
 
 				check(By, temp, cur_ind)
 
@@ -226,7 +226,7 @@ void explicit_by_half(float* By, const float* ez) {
 	}
 }
 
-// Bz = Bz + c2 * ddy * ex
+// Bz = Bz + c2 * dy * ex
 void explicit_bz_half(float* Bz, const float* ex) {
 	for (auto k = 0; k < nz; k++) {             // [0, nz)
 		for (auto j = 1; j < ny - 1; j++) {     // [1, ny - 1)
@@ -236,7 +236,7 @@ void explicit_bz_half(float* Bz, const float* ex) {
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				auto temp = Bz[cur_ind] + (c2 * ddy * (ex[next_y] - ex[last_y]));
+				auto temp = Bz[cur_ind] + (c2 * dy * (ex[next_y] - ex[last_y]));
 
 				check(Bz, temp, cur_ind)
 
@@ -247,7 +247,7 @@ void explicit_bz_half(float* Bz, const float* ex) {
 }
 
 /* N + 1/2 -> N + 1 */
-// Bx = Bx + c2 * ddy * ez
+// Bx = Bx + c2 * dy * ez
 void explicit_bx_one(float* Bx, const float* ez) {
 	for (auto k = 0; k < nz; k++) {             // [0, nz)
 		for (auto j = 1; j < ny - 1; j++) {     // [1, ny - 1)
@@ -257,7 +257,7 @@ void explicit_bx_one(float* Bx, const float* ez) {
 				auto next_y = get_index(i, j + 1, k);
 				auto last_y = get_index(i, j - 1, k);
 
-				auto temp = Bx[cur_ind] - (c2 * ddy * (ez[next_y] - ez[last_y]));
+				auto temp = Bx[cur_ind] - (c2 * dy * (ez[next_y] - ez[last_y]));
 
 				check(Bx, temp, cur_ind)
 
@@ -267,7 +267,7 @@ void explicit_bx_one(float* Bx, const float* ez) {
 	}
 }
 
-// By = By - c2 * ddz * ex
+// By = By - c2 * dz * ex
 void explicit_by_one(float* By, const float* ex) {
 	for (auto k = 1; k < nz - 1; k++) {         // [1, nz - 1)
 		for (auto j = 0; j < ny; j++) {         // [0, ny)
@@ -277,7 +277,7 @@ void explicit_by_one(float* By, const float* ex) {
 				auto next_z = get_index(i, j, k + 1);
 				auto last_z = get_index(i, j, k - 1);
 
-				auto temp = By[cur_ind] - (c2 * ddz * (ex[next_z] - ex[last_z]));
+				auto temp = By[cur_ind] - (c2 * dz * (ex[next_z] - ex[last_z]));
 
 				check(By, temp, cur_ind)
 
@@ -287,7 +287,7 @@ void explicit_by_one(float* By, const float* ex) {
 	}
 }
 
-// Bz = Bz - c2 * ddx * ey
+// Bz = Bz - c2 * dx * ey
 void explicit_bz_one(float* Bz, const float* ey) {
 	for (auto k = 0; k < nz; k++) {                 // [0, nz)
 		for (auto j = 0; j < ny; j++) {             // [0, ny)
@@ -297,7 +297,7 @@ void explicit_bz_one(float* Bz, const float* ey) {
 				auto next_x = get_index(i + 1, j, k);
 				auto last_x = get_index(i - 1, j, k);
 
-				auto temp = Bz[cur_ind] - (c2 * ddx * (ey[next_x] - ey[last_x]));
+				auto temp = Bz[cur_ind] - (c2 * dx * (ey[next_x] - ey[last_x]));
 
 				check(Bz, temp, cur_ind)
 

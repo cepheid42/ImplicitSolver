@@ -14,13 +14,13 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 	Timer update_loop_timer;
 	update_loop_timer.start();
 
-	Tridiagonal td_x_half(ny, ddy);
-	Tridiagonal td_y_half(nz, ddz);
-	Tridiagonal td_z_half(nx, ddx);
+	Tridiagonal td_x_half(ny, dy);
+	Tridiagonal td_y_half(nz, dz);
+	Tridiagonal td_z_half(nx, dx);
 
-	Tridiagonal td_x_one(nz, ddz);
-	Tridiagonal td_y_one(nx, ddx);
-	Tridiagonal td_z_one(ny, ddy);
+	Tridiagonal td_x_one(nz, dz);
+	Tridiagonal td_y_one(nx, dx);
+	Tridiagonal td_z_one(ny, dy);
 
 	// Begin time loop
 	for (int q = 0; q < nt; q++) {
@@ -28,8 +28,7 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 //		inc_ey(e.Ey, q);
 //		inc_ez(e.Ez, q);
 		auto ind = true_middle();
-		auto a = ((float(q) * dt) - t0) / tau;
-		s.Jz[ind] = a * exp(-1.0f * (a * a));
+		e.Ez[ind] = sin(2.0f * pi * freq * float(q) * dt);
 
 		// c1 = dt / (2 * eps0)
 		// c2 = dt / (2 * mu0)
