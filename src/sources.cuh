@@ -23,25 +23,33 @@ public:
 	float* Jz;
 };
 
-void inc_ey(float* Ey, int time_step) {
-	for (int j = 0; j < ny; j++) {
-		auto ind = get_index(0, j, int(nz / 2));
-		float time = float(time_step) * dt;
-		float time_dep_c = std::cos(2.0f * pi * freq * time) * std::exp(-1.0f * std::pow(time - t0, n0) / (2.0f * std::pow(sig0, n0)));
+void update_sources(Source& s, float t) {
+	float sigX = 10.0f * dx;
+	float sigY = 10.0f * dy;
+	float sigZ = 10.0f * dz;
+	float X0 = dx * float(nx - 1) / 2.0f;
+	float Y0 = dy * float(ny - 1) / 2.0f;
+	float Z0 = dz * float(nz - 1) / 2.0f;
+	float J0 = -140.0f * 0.007945f * (x_resolution / 96.0f);
 
-		Ey[ind] = ez0 * time_dep_c * std::exp(-1.0f * std::pow(float(j) * dy, n0) / (2.0f * std::pow(4.0f * lambda, n0)));
-	}
-}
+	float time_dep_s = std::sin(2.0f * pi * freq * t) * std::exp(-1.0f * sqr(t - t0) / (2.0f * sqr(sig0)));
 
-void inc_ez(float* Ez, int time_step) {
 	for (int k = 0; k < nz; k++) {
-		auto ind = get_index(0, int(ny / 2), k);
-		float time = float(time_step) * dt;
-		float time_dep_s = std::sin(2.0f * pi * freq * time) * std::exp(-1.0f * std::pow(time - t0, n0) / (2.0f * std::pow(sig0, n0)));
+		for (int j = 0; j < ny; j++) {
+			for (int i = 0; i < nx; i++) {
+				auto ind = get_index(i, j, k);
 
-		Ez[ind] = ez0 * time_dep_s * std::exp(-1.0f * std::pow(float(k) * dy, n0) / (2.0f * std::pow(4.0f * lambda, n0)));
+				float r2 = sqr(i * dx - X0) / (2.0f * sqr(sigX)) + sqr(j * dy - Y0) / (2.0f * sqr(sigY)) + sqr(k * dz - Z0) / (2.0f * sqr(sigZ));
+				float sDep = std::exp(-r2);
+
+				s.Jx[ind] = 0.0f;
+				s.Jy[ind] = 0.0f;
+				s.Jz[ind] = J0 * sDep * time_dep_s;
+			}
+		}
 	}
 }
+
 
 
 #endif //REGIMPLICIT_SOURCES_H

@@ -14,72 +14,71 @@ void run_loop(Efield& e, Bfield& b, Source& s) {
 	Timer update_loop_timer;
 	update_loop_timer.start();
 
-	Tridiagonal td_x_half(ny, dy);
-	Tridiagonal td_y_half(nz, dz);
-	Tridiagonal td_z_half(nx, dx);
+	Tridiagonal td_x_half(nx, dy); // ex n+1/2
+	Tridiagonal td_y_half(ny, dz); // ey n+1/2
+	Tridiagonal td_z_half(nz, dx); // ez n+1/2
 
-	Tridiagonal td_x_one(nz, dz);
-	Tridiagonal td_y_one(nx, dx);
-	Tridiagonal td_z_one(ny, dy);
+	Tridiagonal td_x_one(nx, dz); // ex n+1
+	Tridiagonal td_y_one(ny, dx); // ey n+1
+	Tridiagonal td_z_one(nz, dy); // ez n+1
 
 	// Begin time loop
 	for (int q = 0; q < nt; q++) {
-		// Sources
-//		inc_ey(e.Ey, q);
-//		inc_ez(e.Ez, q);
-		auto ind = true_middle();
-		e.Ez[ind] = sin(2.0f * pi * freq * float(q) * dt);
+		auto t = float(q) * dt;
+		update_sources(s, t);
 
-		// c1 = dt / (2 * eps0)
-		// c2 = dt / (2 * mu0)
+		/* n -> n + 1/2 */
+		// Implicit e update
+		implicit_ex_half(e, b, s);
+		x_solve(td_x_half, e.ex_rhs, e.ex);
 
-		/* N -> N + 1/2 */
-		// Implicit update
-		implicit_ex_half(e.ex_rhs, e.Ex, b.Bz, s.Jx); // ex = Ex + c1 * ddy * Bz - c1 * Jx
-		implicit_ey_half(e.ey_rhs, e.Ey, b.Bx, s.Jy); // ey = Ey + c1 * ddz * Bx - c1 * Jy
-		implicit_ez_half(e.ez_rhs, e.Ez, b.By, s.Jz); // ez = Ez + c1 * ddx * By - c1 * Jz
+		implicit_ey_half(e, b, s);
+		y_solve(td_y_half, e.ey_rhs, e.ey);
 
-		ddy_solve(td_x_half, e.ex_rhs, e.ex);
-		ddz_solve(td_y_half, e.ey_rhs, e.ey);
-		ddx_solve(td_z_half, e.ez_rhs, e.ez);
+		implicit_ez_half(e, b, s);
+		z_solve(td_z_half, e.ez_rhs, e.ez);
 
-
-		// Explicit update
+		// Explicit E update
 		explicit_E(e.Ex, e.ex);
 		explicit_E(e.Ey, e.ey);
 		explicit_E(e.Ez, e.ez);
 
-		explicit_bx_half(b.Bx, e.ey); // Bx = Bx + c2 * ddz * ey
-		explicit_by_half(b.By, e.ez); // By = By + c2 * ddx * ez
-		explicit_bz_half(b.Bz, e.ex); // Bz = Bz + c2 * ddy * ex
+		// Explicit H update
+		explicit_Hx_half(b, e);
+		explicit_Hy_half(b, e);
+		explicit_Hz_half(b, e);
 
+		/* n + 1/2 -> n + 1 */
+		// Implicit e update
+		implicit_ex_one(e, b);
+		x_solve(td_x_one, e.ex_rhs, e.ex);
 
-		/* N + 1/2 -> N + 1 */
-		// Implicit update
-		implicit_ex_one(e.ex_rhs, e.Ex, b.By); // ex = Ex - c1 * ddz * By
-		implicit_ey_one(e.ey_rhs, e.Ey, b.Bz); // ey = Ey - c1 * ddx * Bz
-		implicit_ez_one(e.ez_rhs, e.Ez, b.Bx); // ez = Ez - c1 * ddy * Bx
+		implicit_ey_one(e, b);
+		y_solve(td_y_one, e.ey_rhs, e.ey);
 
-		ddz_solve(td_x_one, e.ex_rhs, e.ex);
-		ddx_solve(td_y_one, e.ey_rhs, e.ey);
-		ddy_solve(td_z_one, e.ez_rhs, e.ez);
+		implicit_ez_one(e, b);
+		z_solve(td_z_one, e.ez_rhs, e.ez);
 
-		// Explicit update
+		// Explicit E update
 		explicit_E(e.Ex, e.ex);
 		explicit_E(e.Ey, e.ey);
 		explicit_E(e.Ez, e.ez);
 
-		explicit_bx_one(b.Bx, e.ez); // Bx = Bx - c2 * ddy * ez
-		explicit_by_one(b.By, e.ex); // By = By - c2 * ddz * ex
-		explicit_bz_one(b.Bz, e.ey); // Bz = Bz - c2 * ddx * ey
+		// Explicit H update
+		explicit_Hx_one(b, e);
+		explicit_Hy_one(b, e);
+		explicit_Hz_one(b, e);
 
 		if (q % step == 0) {
-			cout << q << "/" << nt << ": snapshot taken (" << update_loop_timer.split() << "s)" << endl;
-			snapshot(q, e, b, s);
+			cout << q << "/" << nt << ": " << update_loop_timer.split() << endl;
+			snapshot(q, e, b);
 		}
 	}
+
+	cout << "Update loop completed. Processing arrays." << endl;
+	snapshot(nt, e, b);
 	update_loop_timer.stop();
-	cout << "Total loop time: " << setprecision(3) << update_loop_timer.total << "s" << endl;
+	cout << "Processing completed.\nTotal time: " << update_loop_timer.total << endl;
 }
 
 int main() {

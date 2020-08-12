@@ -6,22 +6,21 @@
 class Bfield {
 public:
 	Bfield() :
-		Bx(new float[nz * ny * nx]{}),
-		By(new float[nz * ny * nx]{}),
-		Bz(new float[nz * ny * nx]{})
-//		By(new float[nx])
+			Hx(new float[nz * ny * nx]{}),
+			Hy(new float[nz * ny * nx]{}),
+			Hz(new float[nz * ny * nx]{})
 	{}
 
 	~Bfield() {
-		delete[] Bx;
-		delete[] By;
-		delete[] Bz;
+		delete[] Hx;
+		delete[] Hy;
+		delete[] Hz;
 	}
 
 public:
-	float* Bx;
-	float* By;
-	float* Bz;
+	float* Hx;
+	float* Hy;
+	float* Hz;
 };
 
 #endif //REGIMPLICIT_B_FIELD_H

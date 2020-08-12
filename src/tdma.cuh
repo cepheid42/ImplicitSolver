@@ -46,7 +46,7 @@ public:
 };
 
 
-void ddx_solve(const Tridiagonal& t, const float* d, float* x) {
+void x_solve(const Tridiagonal& t, const float* d, float* x) {
 	// rows of x
 	for (int k = 0; k < nz; k++) {
 		for (int j = 0; j < ny; j++) {
@@ -83,7 +83,7 @@ void ddx_solve(const Tridiagonal& t, const float* d, float* x) {
 	}
 }
 
-void ddy_solve(const Tridiagonal& t, const float* d, float* x) {
+void y_solve(const Tridiagonal& t, const float* d, float* x) {
 	// columns of y
 	for (int k = 0; k < nz; k++) {
 		for (int i = 0; i < nx; i++) {
@@ -120,7 +120,7 @@ void ddy_solve(const Tridiagonal& t, const float* d, float* x) {
 	}
 }
 
-void ddz_solve(const Tridiagonal& t, const float* d, float* x) {
+void z_solve(const Tridiagonal& t, const float* d, float* x) {
 	// rows of z
 	for (int j = 0; j < ny; j++) {
 		for (int i = 0; i < nx; i++) {

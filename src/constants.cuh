@@ -19,18 +19,18 @@ const float eps0 = 8.85418782e-12f;  // F/m
 const float mu0  = 1.25663706e-6f;   // H/m
 const float pi = 3.1415926535f;
 
-const float freq   = 1.4e7f;         // 14 MHz
+const float freq   = 14e6f / 3.0f;         // 14 MHz
 const float lambda = c0 / freq;      // 21.41 m
 const float T      = 1.0f / freq;    // 71.43 ns
-//const float t0     = 3.0f * T;
+const float t0     = 3.0f * T;
 const float sig0   = 1.0f * T;
-const float n0     = 2.0f;
 
+const float n0     = 2.0f;
 const float ez0    = 144.0f; // V/m
 
 /* ====== Spatial Constants ====== */
-const int x_resolution = 16;
-const int num_wavelengths = 6;
+const int x_resolution = 64;
+const int num_wavelengths = 2;
 
 const int nx = num_wavelengths * x_resolution + 1;
 const int ny = nx;
@@ -42,21 +42,18 @@ const float dz = dx;
 
 /* ====== Temporal Constants ====== */
 // Courant number
-const float cfl = 0.35f;
+const float cfl = 1.0f;
 const float dt = cfl * dx / c0;
-const int nt = int(num_wavelengths * lambda / (c0 * dt)) + 1;
+const int nt = int(0.5f * num_wavelengths * lambda / (c0 * dt)) + 1;
 
 /* ====== Derivative Coefficients ====== */
-const float c1 = dt / (2.0f * eps0);
-const float c2 = dt / (2.0f * mu0);
+//const float c1 = dt / (2.0f * eps0);
+//const float c2 = dt / (2.0f * mu0);
 
 /* ====== Helpful Constants ====== */
-const int half_nx = int(nx / 2);
-const int half_ny = int(ny / 2);
-const int half_nz = int(ny / 2);
-
-//const float tau = 1.5e-10;
-//const float t0 = 3 * tau;
+//const float xmin = 0.0f;
+//const float ymin = -15.0f * num_wavelengths * lambda / 2.0f;
+//const float zmin = ymin;
 
 /* ===== Timer struct ===== */
 struct Timer {
@@ -90,12 +87,8 @@ inline unsigned get_index(unsigned i, unsigned j, unsigned k) {
 	return i + (nx * j) + (nx * ny * k);
 }
 
-inline unsigned yz_middle() {
-	return 0 + (nx * int(ny / 2)) + (nx * ny * int(nz / 2));
-}
-
-inline unsigned true_middle() {
-	return int(nx / 2) + int(nx * (ny / 2)) + (nx * ny * int(nz / 2));
+inline float sqr(float a) {
+	return a * a;
 }
 
 #endif //REGIMPLICIT_CONSTANTS_H
